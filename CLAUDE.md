@@ -50,6 +50,10 @@ CHI values: Nicola, Leti, Shared
 - Prompt caching attivo sul system prompt (cache_control: ephemeral)
 - Output strutturato: { summary, insights[], warnings[], raw_data }
 
+## Convenzioni commit
+- Ogni commit include sempre il co-autore:
+  `Co-authored-by: Claude Sonnet 4.6 <noreply@anthropic.com>`
+
 ## Regole di modifica
 - Non toccare parti non correlate al task
 - Modifiche minime e sicure
