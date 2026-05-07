@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>csvagent · BIKE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111;
+    --border: #222;
+    --accent: #e8ff3c;
+    --accent2: #ff5733;
+    --text: #e8e8e0;
+    --muted: #555;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  header h1 {
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+  }
+
+  header .meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: calc(100vh - 65px);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+  }
+
+  .sidebar h2 {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .schema-block {
+    font-size: 0.72rem;
+    line-height: 1.7;
+  }
+
+  .schema-block .label {
+    color: var(--muted);
+    display: inline-block;
+    width: 80px;
+  }
+
+  .schema-block .val {
+    color: var(--accent);
+  }
+
+  .suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .suggestion-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .suggestion-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Main */
+  .main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ask-bar {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .ask-bar textarea {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    resize: none;
+    min-height: 60px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .ask-bar textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .ask-bar textarea::placeholder {
+    color: var(--muted);
+  }
+
+  .ask-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    height: 60px;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+
+  .ask-btn:hover { background: #d4e836; }
+  .ask-btn:disabled { background: var(--border); color: var(--muted); cursor: wait; }
+
+  .model-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0 0.5rem;
+    height: 60px;
+    outline: none;
+    cursor: pointer;
+  }
+  .model-select:focus { border-color: var(--accent); }
+
+  /* Results area */
+  .results {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1rem;
+    color: var(--muted);
+  }
+
+  .empty-state .icon {
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+
+  .empty-state p {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Response card */
+  .response-card {
+    border: 1px solid var(--border);
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .response-card .question {
+    padding: 0.75rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .response-card .question span {
+    color: var(--text);
+    font-size: 0.82rem;
+  }
+
+  .response-card .question .ts {
+    font-size: 0.65rem;
+    color: var(--muted);
+    white-space: nowrap;
+    margin-left: 1rem;
+  }
+
+  .response-body {
+    padding: 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .summary-text {
+    font-family: var(--sans);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .insights-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .insights-list li {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  .insights-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .warnings-list li::before {
+    color: var(--accent2);
+    content: '⚠';
+  }
+
+  .raw-data {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: #8a8a7a;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Loading */
+  .loading-card {
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .loading-text .dots::after {
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }
+
+  @keyframes dots {
+    0%   { content: ''; }
+    25%  { content: '.'; }
+    50%  { content: '..'; }
+    75%  { content: '...'; }
+    100% { content: ''; }
+  }
+
+  .error-card {
+    border: 1px solid var(--accent2);
+    padding: 1rem 1.25rem;
+    font-size: 0.8rem;
+    color: var(--accent2);
+    animation: fadeIn 0.2s ease;
+  }
+
+  /* Raw data toggle */
+  .toggle-raw {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .toggle-raw:hover { color: var(--text); }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🚲 csvagent</h1>
+  <span class="meta" id="schema-meta">caricamento...</span>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div>
+      <h2>Schema</h2>
+      <div class="schema-block" id="schema-info">—</div>
+    </div>
+    <div>
+      <h2>Domande rapide</h2>
+      <div class="suggestions" id="suggestions">
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Quanto ho speso in totale per anno?</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Quali sono le 10 spese più alte di sempre?</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Spesa per categoria: quali pesa di più?</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Ci sono anomalie o spese insolite?</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Trend di spesa su Zwift negli anni</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Confronta 2022 vs 2023 per categoria</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Quante spese periodiche ho ogni anno?</button>
+        <button class="suggestion-btn" onclick="ask(this.textContent)">Il mese più costoso in assoluto?</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="ask-bar">
+      <textarea id="question" placeholder="Es: Quanto ho speso in abbigliamento nel 2024?" rows="2"></textarea>
+      <select id="dataset-select" class="model-select">
+        <option value="BIKE">🚴 Ciclismo</option>
+        <option value="HOME">🏠 Casa</option>
+      </select>
+      <select id="model-select" class="model-select">
+        <option value="claude-haiku-4-5">Haiku — veloce / economico</option>
+        <option value="claude-sonnet-4-5">Sonnet — bilanciato</option>
+        <option value="claude-opus-4-5">Opus — potente / costoso</option>
+      </select>
+      <button class="ask-btn" id="send-btn" onclick="submitQuestion()">ASK →</button>
+    </div>
+    <div class="results" id="results">
+      <div class="empty-state">
+        <div class="icon">⟳</div>
+        <p>Fai una domanda per iniziare</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Load schema on mount
+fetch('/api/schema')
+  .then(r => r.json())
+  .then(schema => {
+    document.getElementById('schema-meta').textContent =
+      `${schema.totalRows} righe · ${schema.years[0]}–${schema.years.at(-1)} · ${schema.categories.length} categorie`;
+
+    document.getElementById('schema-info').innerHTML = `
+      <div><span class="label">Righe</span><span class="val">${schema.totalRows}</span></div>
+      <div><span class="label">Anni</span><span class="val">${schema.years.join(', ')}</span></div>
+      <div><span class="label">Categorie</span><span class="val">${schema.categories.join(' · ')}</span></div>
+      <div><span class="label">Vendor top</span><span class="val">Zwift, Amazon, Decathlon...</span></div>
+    `;
+  });
+
+// Enter to submit (Shift+Enter = newline)
+document.getElementById('question').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitQuestion(); }
+});
+
+function ask(text) {
+  document.getElementById('question').value = text;
+  submitQuestion();
+}
+
+function submitQuestion() {
+  const input = document.getElementById('question');
+  const q = input.value.trim();
+  if (!q) return;
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  input.value = '';
+
+  const results = document.getElementById('results');
+
+  // Remove empty state
+  const empty = results.querySelector('.empty-state');
+  if (empty) empty.remove();
+
+  // Loading card
+  const loadingEl = document.createElement('div');
+  loadingEl.className = 'loading-card';
+  loadingEl.innerHTML = `
+    <div class="spinner"></div>
+    <div class="loading-text">Analisi in corso<span class="dots"></span></div>
+  `;
+  results.prepend(loadingEl);
+
+  fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question: q, model: document.getElementById('model-select').value, dataset: document.getElementById('dataset-select').value })
+  })
+  .then(r => r.json())
+  .then(data => {
+    loadingEl.remove();
+    results.prepend(buildCard(q, data));
+  })
+  .catch(err => {
+    loadingEl.remove();
+    const errEl = document.createElement('div');
+    errEl.className = 'error-card';
+    errEl.textContent = `Errore: ${err.message}`;
+    results.prepend(errEl);
+  })
+  .finally(() => { btn.disabled = false; });
+}
+
+function buildCard(question, data) {
+  const card = document.createElement('div');
+  card.className = 'response-card';
+
+  const ts = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+  const hasInsights = data.insights?.length > 0;
+  const hasWarnings = data.warnings?.length > 0;
+  const hasRaw = data.raw_data && Object.keys(data.raw_data).length > 0;
+
+  const insightsHTML = hasInsights ? `
+    <div>
+      <div class="section-label">Insights</div>
+      <ul class="insights-list">
+        ${data.insights.map(i => `<li>${i}</li>`).join('')}
+      </ul>
+    </div>` : '';
+
+  const warningsHTML = hasWarnings ? `
+    <div>
+      <div class="section-label">Warnings</div>
+      <ul class="insights-list warnings-list">
+        ${data.warnings.map(w => `<li>${w}</li>`).join('')}
+      </ul>
+    </div>` : '';
+
+  const rawId = 'raw-' + Date.now();
+  const rawHTML = hasRaw ? `
+    <div>
+      <button class="toggle-raw" onclick="toggleRaw('${rawId}')">mostra dati grezzi</button>
+      <pre class="raw-data" id="${rawId}" style="display:none">${JSON.stringify(data.raw_data, null, 2)}</pre>
+    </div>` : '';
+
+  card.innerHTML = `
+    <div class="question">
+      <span>${question}</span>
+      <span class="ts">${ts}</span>
+    </div>
+    <div class="response-body">
+      <div class="summary-text">${data.summary || '—'}</div>
+      ${insightsHTML}
+      ${warningsHTML}
+      ${rawHTML}
+    </div>
+  `;
+
+  return card;
+}
+
+function toggleRaw(id) {
+  const el = document.getElementById(id);
+  const btn = el.previousElementSibling;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    btn.textContent = 'nascondi dati grezzi';
+  } else {
+    el.style.display = 'none';
+    btn.textContent = 'mostra dati grezzi';
+  }
+}
+</script>
+</body>
+</html>
