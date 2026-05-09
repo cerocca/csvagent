@@ -10,6 +10,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 dayjs.extend(customParseFormat);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const { version } = JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8'));
 const app = express();
 const PORT = 3333;
 
@@ -406,7 +407,12 @@ app.post('/api/ask', async (req, res) => {
   }
 });
 
-app.get('/api/schema', (_, res) => res.json(SCHEMA));
+app.get('/api/schema', (req, res) => {
+  const dataset = req.query.dataset === 'HOME' ? 'HOME' : 'BIKE';
+  res.json(DATASETS[dataset].schema);
+});
+
+app.get('/api/version', (_, res) => res.json({ version }));
 
 app.listen(PORT, () => {
   console.log(`\n🚲 csvagent running → http://localhost:${PORT}`);

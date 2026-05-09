@@ -1,11 +1,11 @@
 # csvagent — TODO
 
 ## 🟡 UX / WebUI
-- [ ] Restyling UI (da definire direzione estetica)
+- [ ] UI language support (IT/EN)
 
-## 🔵 Opzione B — Google Sheets + MCP (deferred)
-- [ ] Definire quando Opzione A è considerata "stabile"
-- [ ] Ricerca MCP server per Google Sheets (esistente o custom)
-- [ ] Aggiornare sezione "Approccio" del system prompt
-- [ ] Testare autenticazione Google Sheets via MCP
-- [ ] Valutare impatto su architettura multi-dataset (BIKE + HOME)
+## 🔵 Option B — Google Sheets + MCP (deferred)
+- [ ] Define when Option A is considered "stable"
+- [ ] Research MCP server for Google Sheets (existing or custom)
+- [ ] Update "Approach" section in system prompt
+- [ ] Test Google Sheets authentication via MCP
+- [ ] Evaluate impact on multi-dataset architecture (BIKE + HOME)
