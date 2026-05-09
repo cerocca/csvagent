@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## [0.4.0] — 2026-05-08
+### Aggiunto
+- Conversational history lato client: array `conversationHistory[]` con coppie `{ role, content }` (content = summary)
+- Sliding window configurabile da UI: select 4/6/10/20 messaggi, default 6
+- Bottone NEW in toolbar: azzera la history e ripristina la empty state
+- Reset automatico della history al cambio dataset
+- Pulizia delle `.response-card` e `.error-card` residue alla prima domanda dopo un reset
+- Generazione grafici via `buildChart`: chiamata separata Haiku (max_tokens 256, no tool, no system prompt), attivata da keyword ("grafico", "chart", "visualizza", "mostrami")
+- Chart.js in UI: rendering `bar`, `line`, `pie` con bottone "💾 Salva PNG" (canvas.toDataURL)
+- `chart` come campo top-level nella risposta JSON, separato da `raw_data`
+### Modificato
+- `runAgent` accetta nuovo parametro `history = []`; `messages` costruito come `[...history, { role: 'user', content }]`
+- `/api/ask` legge `history` dal body, chiama `buildChart` dopo `runAgent`, aggiunge `result.chart`
+- System prompt aggiornato: `chart` dichiarato campo top-level dell'output JSON
+
 ## [0.3.0] — 2025-05-07
 ### Aggiunto
 - Integrazione dataset HOME (4037 righe, 2014–2025)

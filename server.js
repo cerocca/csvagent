@@ -270,8 +270,14 @@ Regole:
   "summary": "risposta principale in 1-2 frasi",
   "insights": ["insight 1", "insight 2", ...],
   "warnings": ["warning 1", ...],
-  "raw_data": { ...dati numerici chiave se rilevanti }
-}`;
+  "raw_data": { ...dati numerici chiave se rilevanti },
+  "chart": null
+}
+- chart è null se la domanda non richiede un grafico.
+- Se la domanda contiene "grafico", "chart", "visualizza", "mostrami" o simili,
+  popola chart con:
+  { "type": "bar"|"line"|"pie", "title": "...", "labels": [...], "values": [...] }
+  Scegli: line per trend temporali, bar per confronti, pie solo se <= 6 elementi.`;
 
 const HOME_SYSTEM_PROMPT = `Sei un agente analitico per spese domestiche e familiari.
 Hai accesso a ${HOME_SCHEMA.count} spese dal ${HOME_SCHEMA.years[0]} al ${HOME_SCHEMA.years.at(-1)}.
@@ -293,11 +299,17 @@ Regole:
   "summary": "risposta principale in 1-2 frasi",
   "insights": ["insight 1", "insight 2", ...],
   "warnings": ["warning 1", ...],
-  "raw_data": { ...dati numerici chiave se rilevanti }
-}`;
+  "raw_data": { ...dati numerici chiave se rilevanti },
+  "chart": null
+}
+- chart è null se la domanda non richiede un grafico.
+- Se la domanda contiene "grafico", "chart", "visualizza", "mostrami" o simili,
+  popola chart con:
+  { "type": "bar"|"line"|"pie", "title": "...", "labels": [...], "values": [...] }
+  Scegli: line per trend temporali, bar per confronti, pie solo se <= 6 elementi.`;
 
-async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt = SYSTEM_PROMPT, records = RECORDS, schema = SCHEMA) {
-  const messages = [{ role: 'user', content: userQuestion }];
+async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt = SYSTEM_PROMPT, records = RECORDS, schema = SCHEMA, history = []) {
+  const messages = [...history, { role: 'user', content: userQuestion }];
 
   let iterations = 0;
   const MAX_ITER = 5;
@@ -350,9 +362,32 @@ async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt =
   return { summary: 'Max iterazioni raggiunte.', insights: [], warnings: ['Agent loop terminato per timeout'], raw_data: {} };
 }
 
+const CHART_KEYWORDS = ['grafico', 'chart', 'visualizza', 'mostrami'];
+
+async function buildChart(rawData, question) {
+  if (!CHART_KEYWORDS.some(kw => question.toLowerCase().includes(kw))) return null;
+  if (!rawData || Object.keys(rawData).length === 0) return null;
+
+  const response = await client.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 256,
+    messages: [{
+      role: 'user',
+      content: `Dati questi dati JSON:\n${JSON.stringify(rawData)}\n\nRestituisci SOLO un oggetto JSON con questa struttura, senza testo aggiuntivo, senza backtick:\n{ "type": "bar", "title": "...", "labels": [...], "values": [...] }\n\nScegli type: "line" per trend temporali, "bar" per confronti, "pie" solo se <= 6 elementi.\nSe i dati non sono visualizzabili come grafico, restituisci: null`
+    }]
+  });
+
+  const text = response.content.find(b => b.type === 'text')?.text ?? '';
+  try {
+    return JSON.parse(text.trim());
+  } catch {
+    return null;
+  }
+}
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
-  const { question, model = 'claude-haiku-4-5', dataset = 'BIKE' } = req.body;
+  const { question, model = 'claude-haiku-4-5', dataset = 'BIKE', history = [] } = req.body;
   if (!question?.trim()) return res.status(400).json({ error: 'question mancante' });
 
   const ds = DATASETS[dataset] ?? DATASETS.BIKE;
@@ -361,7 +396,8 @@ app.post('/api/ask', async (req, res) => {
   console.log(`\n→ [${new Date().toISOString()}] [${dataset}] "${question}"`);
 
   try {
-    const result = await runAgent(question, model, systemPrompt, ds.records, ds.schema);
+    const result = await runAgent(question, model, systemPrompt, ds.records, ds.schema, history);
+    result.chart = await buildChart(result.raw_data, question);
     console.log(`✓ risposta generata`);
     res.json(result);
   } catch (err) {

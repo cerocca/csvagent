@@ -49,6 +49,13 @@ CHI values: Nicola, Leti, Shared
 - Schema iniettato nel system prompt (no tool get_schema)
 - Prompt caching attivo sul system prompt (cache_control: ephemeral)
 - Output strutturato: { summary, insights[], warnings[], raw_data }
+- Conversational history: `history[]` passato dal client nel body di /api/ask; `messages` = `[...history, { role: 'user', content }]`
+
+## WebUI — toolbar
+- Select dataset: 🚴 Ciclismo / 🏠 Casa (reset history al cambio)
+- Select modello: Haiku / Sonnet / Opus
+- Select window size: 4 / 6 / 10 / 20 messaggi (default 6) — sliding window sulla history prima di ogni invio
+- Bottone NEW: azzera conversationHistory[] e ripristina empty state; pulisce le card residue alla prima domanda successiva
 
 ## Convenzioni commit
 - Ogni commit include sempre il co-autore:
@@ -58,7 +65,8 @@ CHI values: Nicola, Leti, Shared
 - Non toccare parti non correlate al task
 - Modifiche minime e sicure
 - Mantieni backward compatibility
-- Mostra sempre diff o patch prima di applicare
+- Mostra diff e aspetta conferma per: modifiche a logica, system prompt, architettura, route, tool
+- Applica direttamente senza chiedere per: rimozione log, aggiornamento documentazione, modifiche CSS, cleanup
 - Testa con `node server.js` dopo ogni modifica
 - Se il server non parte, controlla prima `ANTHROPIC_API_KEY` nel .env
 

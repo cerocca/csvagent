@@ -6,6 +6,7 @@
 <title>csvagent · BIKE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -370,6 +371,41 @@
 
   .toggle-raw:hover { color: var(--text); }
 
+  .chart-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .save-png-btn {
+    align-self: flex-end;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .save-png-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .new-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    height: 60px;
+    padding: 0 1rem;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .new-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); }
@@ -415,6 +451,13 @@
         <option value="claude-sonnet-4-5">Sonnet — bilanciato</option>
         <option value="claude-opus-4-5">Opus — potente / costoso</option>
       </select>
+      <select id="window-select" class="model-select" title="Dimensione sliding window">
+        <option value="4">win 4</option>
+        <option value="6" selected>win 6</option>
+        <option value="10">win 10</option>
+        <option value="20">win 20</option>
+      </select>
+      <button class="new-btn" id="new-btn" onclick="resetHistory()">NEW</button>
       <button class="ask-btn" id="send-btn" onclick="submitQuestion()">ASK →</button>
     </div>
     <div class="results" id="results">
@@ -427,6 +470,21 @@
 </div>
 
 <script>
+let conversationHistory = [];
+
+document.getElementById('dataset-select').addEventListener('change', () => {
+  conversationHistory = [];
+});
+
+function resetHistory() {
+  conversationHistory = [];
+  document.getElementById('results').innerHTML = `
+    <div class="empty-state">
+      <div class="icon">⟳</div>
+      <p>Conversazione azzerata — fai una nuova domanda</p>
+    </div>`;
+}
+
 // Load schema on mount
 fetch('/api/schema')
   .then(r => r.json())
@@ -467,6 +525,11 @@ function submitQuestion() {
   const empty = results.querySelector('.empty-state');
   if (empty) empty.remove();
 
+  // Se la history è vuota (dopo NEW o cambio dataset) pulisci le card residue
+  if (conversationHistory.length === 0) {
+    results.querySelectorAll('.response-card, .error-card').forEach(el => el.remove());
+  }
+
   // Loading card
   const loadingEl = document.createElement('div');
   loadingEl.className = 'loading-card';
@@ -476,14 +539,21 @@ function submitQuestion() {
   `;
   results.prepend(loadingEl);
 
+  const windowSize = parseInt(document.getElementById('window-select').value);
+  const history = conversationHistory.slice(-windowSize);
+
   fetch('/api/ask', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question: q, model: document.getElementById('model-select').value, dataset: document.getElementById('dataset-select').value })
+    body: JSON.stringify({ question: q, model: document.getElementById('model-select').value, dataset: document.getElementById('dataset-select').value, history })
   })
   .then(r => r.json())
   .then(data => {
     loadingEl.remove();
+    conversationHistory.push(
+      { role: 'user', content: q },
+      { role: 'assistant', content: data.summary ?? '' }
+    );
     results.prepend(buildCard(q, data));
   })
   .catch(err => {
@@ -504,6 +574,7 @@ function buildCard(question, data) {
 
   const hasInsights = data.insights?.length > 0;
   const hasWarnings = data.warnings?.length > 0;
+  const chart = data.chart;
   const hasRaw = data.raw_data && Object.keys(data.raw_data).length > 0;
 
   const insightsHTML = hasInsights ? `
@@ -529,6 +600,13 @@ function buildCard(question, data) {
       <pre class="raw-data" id="${rawId}" style="display:none">${JSON.stringify(data.raw_data, null, 2)}</pre>
     </div>` : '';
 
+  const canvasId = 'chart-' + Date.now();
+  const chartHTML = chart ? `
+    <div class="chart-wrap">
+      <canvas id="${canvasId}"></canvas>
+      <button class="save-png-btn" data-canvas="${canvasId}">💾 Salva PNG</button>
+    </div>` : '';
+
   card.innerHTML = `
     <div class="question">
       <span>${question}</span>
@@ -538,9 +616,21 @@ function buildCard(question, data) {
       <div class="summary-text">${data.summary || '—'}</div>
       ${insightsHTML}
       ${warningsHTML}
+      ${chartHTML}
       ${rawHTML}
     </div>
   `;
+
+  if (chart) {
+    renderChart(card.querySelector('#' + canvasId), chart);
+    card.querySelector('[data-canvas="' + canvasId + '"]').addEventListener('click', () => {
+      const canvas = card.querySelector('#' + canvasId);
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = (chart.title || 'chart') + '.png';
+      a.click();
+    });
+  }
 
   return card;
 }
@@ -555,6 +645,39 @@ function toggleRaw(id) {
     el.style.display = 'none';
     btn.textContent = 'mostra dati grezzi';
   }
+}
+
+function renderChart(canvas, chartData) {
+  const { type, title, labels, values } = chartData;
+  new Chart(canvas, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        label: title,
+        data: values,
+        backgroundColor: type === 'pie'
+          ? ['#e8ff3c','#ff5733','#3ce8c8','#c83cff','#ff3c8e','#3c8eff'].slice(0, values.length)
+          : '#e8ff3c33',
+        borderColor: type === 'pie' ? '#0a0a0a' : '#e8ff3c',
+        borderWidth: type === 'pie' ? 2 : 2,
+        pointBackgroundColor: '#e8ff3c',
+        tension: 0.3,
+        fill: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: type === 'pie', labels: { color: '#e8e8e0', font: { family: "'Space Mono', monospace", size: 11 } } },
+        title: { display: !!title, text: title, color: '#e8e8e0', font: { family: "'Space Mono', monospace", size: 12 } }
+      },
+      scales: type !== 'pie' ? {
+        x: { ticks: { color: '#555', font: { family: "'Space Mono', monospace", size: 10 } }, grid: { color: '#222' } },
+        y: { ticks: { color: '#555', font: { family: "'Space Mono', monospace", size: 10 } }, grid: { color: '#222' } }
+      } : {}
+    }
+  });
 }
 </script>
 </body>

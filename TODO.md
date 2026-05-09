@@ -1,7 +1,6 @@
 # csvagent — TODO
 
 ## 🟡 UX / WebUI
-- [ ] Streaming risposte (`stream: true`) per feedback progressivo
 - [ ] Restyling UI (da definire direzione estetica)
 
 ## 🔵 Opzione B — Google Sheets + MCP (deferred)
