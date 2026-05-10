@@ -291,6 +291,7 @@
   .layout {
     display: grid;
     grid-template-columns: 280px 1fr;
+    grid-template-rows: 1fr;
     height: 100%;
     overflow: hidden;
     transition: grid-template-columns 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -518,6 +519,7 @@
   /* Results */
   .results {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 1.5rem 1.75rem 3rem;
     display: flex;
@@ -567,6 +569,7 @@
     overflow: hidden;
     animation: fadeIn 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
     box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
   }
 
   @keyframes fadeIn {
@@ -749,6 +752,7 @@
     box-shadow: var(--shadow-sm);
     animation: fadeIn 0.2s ease;
     font-family: var(--sans);
+    flex-shrink: 0;
   }
   .spinner {
     width: 18px; height: 18px;
@@ -785,6 +789,7 @@
     font-size: 0.88rem;
     color: #5A2E1E;
     animation: fadeIn 0.2s ease;
+    flex-shrink: 0;
   }
 
   /* Tweaks panel */

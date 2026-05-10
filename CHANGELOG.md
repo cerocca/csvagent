@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.5.1] — 2026-05-10
+### Fixed
+- Response card collassate dopo fix scroll — aggiunto `flex-shrink: 0` a `.response-card`, `.loading-card`, `.error-card`
+- Scroll area risposte non attiva — aggiunto `grid-template-rows: 1fr` su `.layout` e `min-height: 0` su `.results`
+
 ## [0.5.0] — 2026-05-09
 ### Added
 - `GET /api/version` → reads version from package.json, returns `{ version }`
