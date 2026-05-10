@@ -1,52 +1,60 @@
 # csvagent
 
-Agent Node.js per analisi di spese personali via browser.
-Express + Claude API (tool calling) + agentic loop.
+![version](https://img.shields.io/badge/version-0.6.0-blue)
+![node](https://img.shields.io/badge/node-ESM-green)
+![license](https://img.shields.io/badge/license-MIT-lightgrey)
+
+> A conversational AI agent for personal expense analysis, built on Anthropic SDK with tool calling.
+
+## Features
+
+- Natural language queries over CSV datasets
+- Agentic loop with two tools: predefined operations and free-form JS execution
+- Multi-dataset support with per-dataset schema and system prompt
+- Conversational history with configurable sliding window
+- Chart rendering (bar, line, pie) via Chart.js
+- Dark/light theme, model selector (Haiku / Sonnet / Opus)
 
 ## Stack
-- Node.js ESM
-- Express 5
-- @anthropic-ai/sdk
-- csv-parse
-- dayjs
-- PM2
 
-## Dataset supportati
-- **BIKE** — spese ciclismo (2016–2025)
-- **HOME** — spese domestiche/familiari (2014–2025)
+- Node.js ESM · Express 5
+- [@anthropic-ai/sdk](https://github.com/anthropic-ai/sdk-python) — tool calling, prompt caching
+- csv-parse · dayjs · PM2
 
-## Avvio
+> ⚠️ Architecture is tightly coupled to Anthropic SDK. Not compatible drop-in with OpenRouter or OpenAI-style APIs.
+
+## Quickstart
+
 ```bash
-cp .env.example .env   # aggiungi ANTHROPIC_API_KEY
+cp .env.example .env   # add ANTHROPIC_API_KEY
 npm install
-node server.js         # oppure: pm2 start ecosystem.config.cjs
+node server.js
 ```
 
-## Utilizzo
-Apri http://localhost:3333, seleziona dataset e modello, fai una domanda in linguaggio naturale.
+Open `http://localhost:3333`.
 
-Esempi:
-- "Totale spese 2024 per categoria"
-- "Top 5 acquisti più costosi"
-- "Trend mensile 2023 vs 2024"
+## Bring your own CSV
 
-## Architettura
-Il server espone `/api/ask`. L'agent loop chiama Claude con tool calling,
-esegue query analitiche sul CSV in memoria, restituisce JSON strutturato:
-```json
-{
-  "summary": "...",
-  "insights": ["..."],
-  "warnings": ["..."],
-  "raw_data": {}
-}
+Define your dataset in `server.js`:
+
+```js
+const DATASETS = {
+  MYDATA: {
+    records: parseMyCSV(),
+    schema: { columns: [...], rowCount: N }
+  }
+};
 ```
 
-## Variabili d'ambiente
-| Variabile | Descrizione |
+## Agent tools
+
+| Tool | Description |
 |---|---|
-| ANTHROPIC_API_KEY | Chiave API Anthropic |
+| `query_data` | Predefined operations: list, sum, avg, count, group_by, top_n, trend, anomalies |
+| `run_js` | Arbitrary JS executed on rows via `vm` sandbox (3s timeout) |
 
-## Note
-- I CSV con i dati personali non sono inclusi nel repo
-- Default modello: claude-haiku-4-5 (modificabile da UI)
+## Environment
+
+| Variable | Description |
+|---|---|
+| `ANTHROPIC_API_KEY` | Anthropic API key |
