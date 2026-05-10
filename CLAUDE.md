@@ -45,7 +45,7 @@ CHI values: Nicola, Leti, Shared
 - Max iterazioni: 5
 - max_tokens: 1024
 - Modello: selezionabile dal body /api/ask, default claude-haiku-4-5
-- Tool disponibili: query_data (operation: list/sum/avg/count/group_by/top_n/trend/anomalies)
+- Tool disponibili: query_data (operation: list/sum/avg/count/group_by/top_n/trend/anomalies), run_js (codice JS arbitrario su rows, timeout 3s)
 - Schema iniettato nel system prompt (no tool get_schema)
 - Prompt caching attivo sul system prompt (cache_control: ephemeral)
 - Output strutturato: { summary, insights[], warnings[], raw_data }

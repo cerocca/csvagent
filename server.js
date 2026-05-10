@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import vm from 'vm';
 dayjs.extend(customParseFormat);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -80,6 +81,21 @@ const DATASETS = {
   HOME: { records: HOME_RECORDS, schema: HOME_SCHEMA },
 };
 
+// ─── run_js sandbox ───────────────────────────────────────────────────────────
+function executeRunJs(code, rows) {
+  try {
+    const context = { rows, result: null };
+    vm.createContext(context);
+    vm.runInContext(`result = (function(rows){ ${code} })(rows)`, context, {
+      timeout: 3000
+    });
+    const result = context.result;
+    return { success: true, result: JSON.parse(JSON.stringify(result)) };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // ─── Tools ────────────────────────────────────────────────────────────────────
 const TOOLS = [
   {
@@ -125,12 +141,30 @@ Operazioni disponibili (operation):
       },
       required: ['operation']
     }
+  },
+  {
+    name: 'run_js',
+    description: 'Esegui codice JS arbitrario sui dati quando query_data non è sufficiente. rows è un array di oggetti plain. Usa solo: filter, reduce, map, sort, Math.*. Non usare: groupBy, sum, lodash o metodi non nativi. Restituisci sempre con return.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        code: {
+          type: 'string',
+          description: 'Corpo funzione JS. Riceve rows, deve restituire il risultato con return.'
+        }
+      },
+      required: ['code']
+    }
   }
 ];
 
 // ─── Tool execution ───────────────────────────────────────────────────────────
 function executeTool(name, input, records, schema) {
-  if (name === 'query_data') {
+  console.log(`[tool] ${name}`, JSON.stringify(input).slice(0, 120));
+  if (name === 'run_js') {
+    const { code } = input;
+    return JSON.stringify(executeRunJs(code, records));
+  } else if (name === 'query_data') {
     const { operation, filters = {}, group_field, n = 10, threshold = 2 } = input;
 
     // Apply filters
@@ -263,8 +297,9 @@ Categorie: ${SCHEMA.categories.join(', ')}
 Anni: ${SCHEMA.years.join(', ')}
 
 Regole:
-- Usa sempre i tool per recuperare dati reali. Non inventare numeri.
+- OBBLIGATORIO: chiama sempre almeno un tool prima di rispondere. Non rispondere mai basandoti su conoscenza propria. Se non riesci a rispondere con i tool disponibili, dillo esplicitamente.
 - Chiama più tool in sequenza se necessario per rispondere bene.
+- run_js: esegui codice JS arbitrario su rows. Usa solo metodi nativi JS (filter, reduce, map, sort, Math.*). Non esistono groupBy, sum, o metodi lodash. rows è un array di oggetti con le colonne del dataset selezionato.
 - Rispondi sempre in italiano, in modo conciso e diretto.
 - Output finale DEVE essere JSON con questa struttura esatta:
 {
@@ -289,8 +324,9 @@ Chi: ${HOME_SCHEMA.chi.join(', ')}
 Anni: ${HOME_SCHEMA.years.join(', ')}
 
 Regole:
-- Usa sempre i tool per recuperare dati reali. Non inventare numeri.
+- OBBLIGATORIO: chiama sempre almeno un tool prima di rispondere. Non rispondere mai basandoti su conoscenza propria. Se non riesci a rispondere con i tool disponibili, dillo esplicitamente.
 - Chiama più tool in sequenza se necessario per rispondere bene.
+- run_js: esegui codice JS arbitrario su rows. Usa solo metodi nativi JS (filter, reduce, map, sort, Math.*). Non esistono groupBy, sum, o metodi lodash. rows è un array di oggetti con le colonne del dataset selezionato.
 - Rispondi sempre in italiano, in modo conciso e diretto.
 - Per filtrare per mese usa il numero (es. mese: "1" per gennaio).
 - Per filtrare per persona usa il filtro chi (es. chi: "Nicola").

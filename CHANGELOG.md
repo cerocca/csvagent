@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.6.0] — 2026-05-10
+### Added
+- Tool `run_js`: esecuzione JS arbitrario su rows via `vm.runInNewContext` con timeout 3s
+- Log `[tool]` e `[loop]` in `executeTool` e `runAgent` per debug tool dispatch
+### Changed
+- System prompt BIKE e HOME: obbligo esplicito di chiamare tool prima di rispondere
+
 ## [0.5.1] — 2026-05-10
 ### Fixed
 - Response card collassate dopo fix scroll — aggiunto `flex-shrink: 0` a `.response-card`, `.loading-card`, `.error-card`
