@@ -46,6 +46,10 @@ const DATASETS = {
 };
 ```
 
+## Documentation
+
+See [SETUP.md](SETUP.md) for installation and dataset configuration.
+
 ## Agent tools
 
 | Tool | Description |
