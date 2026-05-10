@@ -44,83 +44,6 @@
     --pad: 1.5rem;
   }
 
-  body[data-ui-font="inter"]   { --sans: 'Inter Tight', -apple-system, sans-serif; }
-  body[data-ui-font="jakarta"] { --sans: 'Plus Jakarta Sans', -apple-system, sans-serif; }
-  body[data-ui-font="manrope"] { --sans: 'Manrope', -apple-system, sans-serif; }
-
-  body[data-accent-font="fraunces"] { --serif: 'Fraunces', Georgia, serif; }
-  body[data-accent-font="dm-serif"] { --serif: 'DM Serif Display', Georgia, serif; }
-
-  /* Palette: cool-slate */
-  body[data-palette="slate"] {
-    --bg: #F4F5F7;
-    --surface: #FFFFFF;
-    --surface-2: #ECEEF2;
-    --border: #DEE2E8;
-    --border-strong: #C0C7D2;
-    --text: #15181D;
-    --text-soft: #3D424B;
-    --muted: #6E7682;
-    --accent: #2A4F7A;
-    --accent-soft: #DCE5F1;
-    --accent-ink: #1A3656;
-    --warn: #B0533C;
-    --warn-soft: #F1DDD3;
-    --positive: #5A8A6F;
-    --c1: #2A4F7A; --c2: #B0533C; --c3: #C49A3F; --c4: #5C8071; --c5: #8A6B9E; --c6: #A45D6E;
-  }
-
-  /* Palette: forest */
-  body[data-palette="forest"] {
-    --bg: #F4F5F4;
-    --surface: #FFFFFF;
-    --surface-2: #ECEEEC;
-    --border: #DEE2DD;
-    --border-strong: #BFC7BD;
-    --text: #14181A;
-    --text-soft: #3C4341;
-    --muted: #6C7570;
-    --accent: #1F5A45;
-    --accent-soft: #DAE8E1;
-    --accent-ink: #143C2D;
-    --warn: #B0533C;
-    --warn-soft: #F1DDD3;
-    --positive: #5A8A6F;
-    --c1: #1F5A45; --c2: #B0533C; --c3: #C49A3F; --c4: #6B83A8; --c5: #8A6B9E; --c6: #A45D6E;
-  }
-
-  /* Density: compact */
-  body[data-density="compact"] {
-    --pad: 1rem;
-    --radius: 10px;
-    font-size: 13px;
-  }
-  body[data-density="compact"] header { padding: 0.75rem 1.25rem; }
-  body[data-density="compact"] .sidebar { padding: 0.85rem 0.75rem 0.85rem 1rem; gap: 1rem; }
-  body[data-density="compact"] .schema-card { padding: 0.7rem 0.8rem; }
-  body[data-density="compact"] .schema-card .hero .num { font-size: 1.5rem; }
-  body[data-density="compact"] .schema-card .row { padding: 0.25rem 0; font-size: 0.72rem; }
-  body[data-density="compact"] .suggestions { gap: 0.25rem; }
-  body[data-density="compact"] .suggestion-btn { padding: 0.4rem 0.6rem; font-size: 0.74rem; }
-  body[data-density="compact"] .ask-bar { padding: 0.6rem 1.25rem; }
-  body[data-density="compact"] .ask-shell { padding: 0.4rem 0.5rem 0.45rem 0.75rem; row-gap: 0.35rem; }
-  body[data-density="compact"] .ask-shell textarea { font-size: 0.85rem; padding: 0.35rem 0.2rem 0.25rem; min-height: 26px; }
-  body[data-density="compact"] .ctrl { height: 28px; padding: 0.25rem 0.45rem; font-size: 0.7rem; }
-  body[data-density="compact"] .ask-btn { height: 32px; padding: 0 0.85rem; font-size: 0.78rem; }
-  body[data-density="compact"] .new-btn { height: 32px; padding: 0 0.65rem; font-size: 0.72rem; }
-  body[data-density="compact"] .results { padding: 0.85rem 1.25rem 2rem; gap: 0.75rem; }
-  body[data-density="compact"] .response-body { padding: 0.9rem 1rem 0.85rem; gap: 0.85rem; }
-  body[data-density="compact"] .question-row { padding: 0.55rem 1rem; }
-  body[data-density="compact"] .summary-text { font-size: 1.2rem; line-height: 1.25; }
-  body[data-density="compact"] .insights-list { gap: 0.3rem; }
-  body[data-density="compact"] .insights-list li { font-size: 0.82rem; padding: 0.45rem 0.7rem 0.45rem 1.9rem; }
-  body[data-density="compact"] .insights-list li::before { left: 0.7rem; width: 12px; height: 12px; }
-  body[data-density="compact"] .chart-wrap { padding: 0.7rem 0.8rem 0.55rem; }
-  body[data-density="compact"] .chart-wrap canvas { max-height: 240px; }
-  body[data-density="compact"] .empty-state { gap: 0.6rem; padding: 1.5rem 1rem; }
-  body[data-density="compact"] .empty-state .figure { font-size: 3rem; }
-  body[data-density="compact"] .empty-state h3 { font-size: 1.25rem; }
-  body[data-density="compact"] .empty-state p { font-size: 0.82rem; }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
@@ -242,13 +165,6 @@
     color: var(--text);
   }
 
-  body[data-brand="wordmark"] .brand h1 {
-    font-family: var(--sans);
-    font-style: normal;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    font-size: 1.2rem;
-  }
 
   .brand .tag {
     font-family: var(--sans);
@@ -614,7 +530,6 @@
     flex-direction: column;
     gap: 1.4rem;
   }
-  body[data-density="compact"] .response-body { padding: 1.1rem 1.1rem 1rem; gap: 1.1rem; }
 
   .summary-text {
     font-family: var(--sans);
@@ -792,84 +707,6 @@
     flex-shrink: 0;
   }
 
-  /* Tweaks panel */
-  #tweaks-panel {
-    position: fixed;
-    bottom: 1.25rem;
-    right: 1.25rem;
-    width: 280px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.18);
-    padding: 1rem;
-    z-index: 100;
-    font-family: var(--sans);
-    display: none;
-  }
-  #tweaks-panel.open { display: block; }
-  #tweaks-panel h4 {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: 1.1rem;
-    margin-bottom: 0.85rem;
-    color: var(--text);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #tweaks-panel h4 .x {
-    background: none; border: none; cursor: pointer;
-    font-size: 1rem; color: var(--muted); padding: 0 0.2rem;
-  }
-  #tweaks-panel h4 .x:hover { color: var(--text); }
-
-  .tweak-group { margin-bottom: 0.95rem; }
-  .tweak-group:last-child { margin-bottom: 0; }
-  .tweak-group label {
-    display: block;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.4rem;
-  }
-  .tweak-segments {
-    display: flex;
-    background: var(--surface-2);
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .tweak-segments button {
-    flex: 1;
-    background: transparent;
-    border: none;
-    padding: 0.4rem 0.5rem;
-    font-family: var(--sans);
-    font-size: 0.74rem;
-    font-weight: 500;
-    color: var(--text-soft);
-    cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.15s;
-  }
-  .tweak-segments button.active {
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: var(--shadow-sm);
-  }
-  .tweak-swatches { display: flex; gap: 6px; }
-  .tweak-swatches button {
-    flex: 1;
-    height: 32px;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .tweak-swatches button.active { border-color: var(--text); }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -933,7 +770,6 @@
     .empty-state { padding: 2rem 1rem; }
     .empty-state .figure { font-size: 3rem; }
     .empty-state h3 { font-size: 1.2rem; }
-    #tweaks-panel { width: auto; left: 0.85rem; right: 0.85rem; bottom: 0.85rem; }
   }
 
   /* Dark theme */
@@ -980,7 +816,7 @@
   .theme-toggle:hover { border-color: var(--border-strong); color: var(--text); }
 </style>
 </head>
-<body data-palette="warm" data-density="cozy" data-brand="serif" data-ui-font="dmsans" data-accent-font="instrument">
+<body>
 
 <div class="sidebar-backdrop" onclick="toggleDrawer(false)"></div>
 
@@ -1087,113 +923,8 @@
   </main>
 </div>
 
-<!-- Tweaks panel -->
-<div id="tweaks-panel">
-  <h4>Tweaks <button class="x" onclick="closeTweaks()">×</button></h4>
-  <div class="tweak-group">
-    <label>Palette</label>
-    <div class="tweak-swatches" id="tw-palette">
-      <button data-val="warm" title="Warm cream" style="background:linear-gradient(135deg,#F5F1E8 50%,#2F5D52 50%)"></button>
-      <button data-val="slate" title="Cool slate" style="background:linear-gradient(135deg,#F4F5F7 50%,#2A4F7A 50%)"></button>
-      <button data-val="forest" title="Forest" style="background:linear-gradient(135deg,#F4F5F4 50%,#1F5A45 50%)"></button>
-    </div>
-  </div>
-  <div class="tweak-group">
-    <label>Densità</label>
-    <div class="tweak-segments" id="tw-density">
-      <button data-val="cozy">Comoda</button>
-      <button data-val="compact">Compatta</button>
-    </div>
-  </div>
-  <div class="tweak-group">
-    <label>Stile brand</label>
-    <div class="tweak-segments" id="tw-brand">
-      <button data-val="serif">Serif</button>
-      <button data-val="wordmark">Wordmark</button>
-    </div>
-  </div>
-  <div class="tweak-group">
-    <label>Stile risposta</label>
-    <div class="tweak-segments" id="tw-summary">
-      <button data-val="serif">Editoriale</button>
-      <button data-val="sans">Diretto</button>
-    </div>
-  </div>
-  <div class="tweak-group">
-    <label>Font UI</label>
-    <div class="tweak-segments" id="tw-ui-font" style="flex-wrap:wrap;gap:3px">
-      <button data-val="dmsans" style="font-family:'DM Sans',sans-serif">DM Sans</button>
-      <button data-val="inter" style="font-family:'Inter Tight',sans-serif">Inter</button>
-      <button data-val="jakarta" style="font-family:'Plus Jakarta Sans',sans-serif">Jakarta</button>
-      <button data-val="manrope" style="font-family:'Manrope',sans-serif">Manrope</button>
-    </div>
-  </div>
-  <div class="tweak-group">
-    <label>Font accent</label>
-    <div class="tweak-segments" id="tw-accent-font" style="flex-wrap:wrap;gap:3px">
-      <button data-val="instrument" style="font-family:'Instrument Serif',serif">Instrument</button>
-      <button data-val="fraunces" style="font-family:'Fraunces',serif">Fraunces</button>
-      <button data-val="dm-serif" style="font-family:'DM Serif Display',serif">DM Serif</button>
-    </div>
-  </div>
-</div>
 
 <script>
-/* Tweaks */
-const TWEAK_DEFAULTS = { palette: 'warm', density: 'cozy', brand: 'serif', summary: 'serif', 'ui-font': 'dmsans', 'accent-font': 'instrument' };
-let tweaks = { ...TWEAK_DEFAULTS };
-
-function applyTweaks() {
-  document.body.dataset.palette = tweaks.palette;
-  document.body.dataset.density = tweaks.density;
-  document.body.dataset.brand = tweaks.brand;
-  document.body.dataset.summary = tweaks.summary;
-  document.body.dataset.uiFont = tweaks['ui-font'];
-  document.body.dataset.accentFont = tweaks['accent-font'];
-  document.querySelectorAll('.summary-text').forEach(el => {
-    if (tweaks.summary === 'sans') {
-      el.style.fontFamily = 'var(--sans)';
-      el.style.fontStyle = 'normal';
-      el.style.fontWeight = '500';
-      el.style.fontSize = '1.05rem';
-    } else {
-      el.style.fontFamily = '';
-      el.style.fontStyle = '';
-      el.style.fontWeight = '';
-      el.style.fontSize = '';
-    }
-  });
-  for (const key of ['palette','density','brand','summary','ui-font','accent-font']) {
-    document.querySelectorAll(`#tw-${key} button`).forEach(b => {
-      b.classList.toggle('active', b.dataset.val === tweaks[key]);
-    });
-  }
-}
-
-function setTweak(k, v) {
-  tweaks[k] = v;
-  applyTweaks();
-  try { window.parent.postMessage({type: '__edit_mode_set_keys', edits: { [k]: v }}, '*'); } catch(e){}
-}
-
-['palette','density','brand','summary','ui-font','accent-font'].forEach(key => {
-  document.querySelectorAll(`#tw-${key} button`).forEach(b => {
-    b.addEventListener('click', () => setTweak(key, b.dataset.val));
-  });
-});
-applyTweaks();
-
-window.addEventListener('message', (e) => {
-  if (!e.data || typeof e.data !== 'object') return;
-  if (e.data.type === '__activate_edit_mode') document.getElementById('tweaks-panel').classList.add('open');
-  else if (e.data.type === '__deactivate_edit_mode') document.getElementById('tweaks-panel').classList.remove('open');
-});
-
-function closeTweaks() {
-  document.getElementById('tweaks-panel').classList.remove('open');
-  try { window.parent.postMessage({type: '__edit_mode_dismissed'}, '*'); } catch(e){}
-}
-try { window.parent.postMessage({type: '__edit_mode_available'}, '*'); } catch(e){}
 
 /* Drawer / sidebar collapse */
 function isMobile() { return window.innerWidth <= 900; }
@@ -1448,7 +1179,6 @@ function buildCard(question, data) {
     });
   }
 
-  applyTweaks();
   return card;
 }
 
