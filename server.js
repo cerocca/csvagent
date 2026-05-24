@@ -231,7 +231,7 @@ function executeTool(name, input, records, schema) {
 
       case 'top_n': {
         const top = [...rows].sort((a, b) => b.QUANTO - a.QUANTO).slice(0, n);
-        return JSON.stringify({ top_n: n, rows: top });
+        return JSON.stringify(top);
       }
 
       case 'trend': {
@@ -306,7 +306,7 @@ Regole:
   "summary": "risposta principale in 1-2 frasi",
   "insights": ["insight 1", "insight 2", ...],
   "warnings": ["warning 1", ...],
-  "raw_data": { ...dati numerici chiave se rilevanti },
+  "raw_data": sempre un array di oggetti quando ci sono righe da mostrare (es. [{campo: valore, ...}, ...]), mai un oggetto flat o wrapper. Array vuoto [] se non ci sono dati da mostrare.,
   "chart": null
 }
 - chart è null se la domanda non richiede un grafico.
@@ -336,7 +336,7 @@ Regole:
   "summary": "risposta principale in 1-2 frasi",
   "insights": ["insight 1", "insight 2", ...],
   "warnings": ["warning 1", ...],
-  "raw_data": { ...dati numerici chiave se rilevanti },
+  "raw_data": sempre un array di oggetti quando ci sono righe da mostrare (es. [{campo: valore, ...}, ...]), mai un oggetto flat o wrapper. Array vuoto [] se non ci sono dati da mostrare.,
   "chart": null
 }
 - chart è null se la domanda non richiede un grafico.

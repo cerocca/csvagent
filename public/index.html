@@ -655,6 +655,21 @@
     margin-top: 0.6rem;
   }
 
+  .raw-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.82rem;
+  }
+  .raw-table th,
+  .raw-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .raw-table th {
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
   /* Loading */
   .loading-card {
     background: var(--surface);
@@ -1141,7 +1156,7 @@ function buildCard(question, data) {
   const rawHTML = hasRaw ? `
     <div>
       <button class="toggle-raw" onclick="toggleRaw('${rawId}')">mostra dati grezzi</button>
-      <pre class="raw-data" id="${rawId}" style="display:none">${JSON.stringify(data.raw_data, null, 2)}</pre>
+      <div class="raw-data" id="${rawId}" style="display:none">${renderRawData(data.raw_data)}</div>
     </div>` : '';
 
   const canvasId = 'chart-' + Math.random().toString(36).slice(2, 9);
@@ -1205,6 +1220,18 @@ function renderMarkdown(text) {
   }
   if (inList) out.push('</ul>');
   return out.join('\n');
+}
+
+function renderRawData(data) {
+  if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0] !== null) {
+    const keys = Object.keys(data[0]);
+    const headerCells = keys.map(k => `<th>${escapeHtml(k)}</th>`).join('');
+    const rows = data.map(row =>
+      `<tr>${keys.map(k => `<td>${escapeHtml(row[k] == null ? '' : row[k])}</td>`).join('')}</tr>`
+    ).join('');
+    return `<table class="raw-table"><thead><tr>${headerCells}</tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  return `<pre class="raw-data-pre">${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
 }
 
 function toggleRaw(id) {
