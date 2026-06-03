@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [0.7.0] — 2026-06-03
+### Added
+- Session persistence via localStorage: ogni risposta salvata in `csvagent_conv_BIKE` / `csvagent_conv_HOME`
+- Bottone "↩ Riprendi" in toolbar: visibile solo se esiste una sessione salvata per il dataset attivo
+- `resumeSession()`: ripristina cards nel DOM e `conversationHistory[]` dal dato salvato
+- `resetHistory()` / bottone NEW: pulisce anche la chiave localStorage del dataset attivo
+- `updateResumeButton()`: aggiorna visibilità "Riprendi" al cambio dataset e dopo ogni operazione
+- Gestione silenziosa errori localStorage (quota, ecc.) via try/catch
+- Sezione CRONOLOGIA nella sidebar (tra DATI e SCHEMA): lista verticale delle domande salvate in localStorage, ordinate dalla più recente
+- `renderHistoryList()`: popola `#history-list` leggendo la sessione attiva; mostra testo troncato a 40 caratteri con `title` completo al hover
+- `showSavedResult()`: monta la card storica via `buildCard()` senza chiamare l'API e senza toccare `conversationHistory[]`
+- `renderHistoryList()` richiamato automaticamente in `saveSession`, `clearSession`, `resumeSession`, listener cambio dataset e init
+- Testo muted "Nessuna cronologia" quando la lista è vuota
+
 ## [0.6.0] — 2026-05-10
 ### Added
 - Tool `run_js`: esecuzione JS arbitrario su rows via `vm.runInNewContext` con timeout 3s

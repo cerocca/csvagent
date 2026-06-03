@@ -4,8 +4,6 @@
 - [ ] UI language support (IT/EN+) — oggetto LANG inline, selector in toolbar, localStorage
 
 ## 💡 Feature Backlog
-- [ ] Save conversation to localStorage
-- [ ] Query history
 - [ ] Savings suggestions
 - [ ] HTML report generation (scaricabile)
 

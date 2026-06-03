@@ -24,7 +24,7 @@ csvagent/
 │   └── HOME.csv       # spese casa/famiglia, 4037 righe, 2014–2025
 ├── .env               # ANTHROPIC_API_KEY
 ├── CLAUDE.md          # questo file
-├── todo.md            # task aperti
+├── TODO.md            # task aperti
 └── CHANGELOG.md       # storia delle modifiche
 ```
 
@@ -55,7 +55,23 @@ CHI values: Nicola, Leti, Shared
 - Select dataset: 🚴 Ciclismo / 🏠 Casa (reset history al cambio)
 - Select modello: Haiku / Sonnet / Opus
 - Select window size: 4 / 6 / 10 / 20 messaggi (default 6) — sliding window sulla history prima di ogni invio
-- Bottone NEW: azzera conversationHistory[] e ripristina empty state; pulisce le card residue alla prima domanda successiva
+- Bottone NEW: azzera conversationHistory[], cancella chiave localStorage del dataset attivo, ripristina empty state; pulisce le card residue alla prima domanda successiva
+- Bottone "↩ Riprendi": appare solo se esiste una sessione salvata per il dataset attivo; ripristina cards e conversationHistory[] da localStorage
+
+## WebUI — sidebar CRONOLOGIA
+- Sezione nella sidebar tra DATI e SCHEMA
+- `renderHistoryList()`: legge localStorage (stessa chiave della sessione attiva), mostra le domande dalla più recente alla più vecchia
+- Ogni voce: testo troncato a 40 caratteri, `title` con testo completo; click → `showSavedResult()` monta la card via `buildCard()` senza API call e senza modificare `conversationHistory[]`
+- Lista vuota: testo muted "Nessuna cronologia"
+- Aggiornamento automatico dopo `saveSession`, `clearSession`, `resumeSession`, cambio dataset, init
+
+## WebUI — localStorage session
+- Chiave: `csvagent_conv_BIKE` o `csvagent_conv_HOME` (dipende dal dataset attivo)
+- Struttura: `[{ question, result }]` dove `result` è il JSON completo (summary, insights, warnings, raw_data, chart)
+- Salvataggio: automatico ad ogni risposta ricevuta
+- Ripristino: manuale via bottone "↩ Riprendi" (mai automatico al reload o al cambio dataset)
+- Cambio dataset: aggiorna visibilità bottone Riprendi senza ripristinare
+- Errori (quota, ecc.): gestiti silenziosamente con try/catch
 
 ## Convenzioni commit
 - Ogni commit include sempre il co-autore:
@@ -72,7 +88,7 @@ CHI values: Nicola, Leti, Shared
 
 ## Documentazione
 Quando viene richiesto di aggiornare la documentazione (o "tutti i file .md del progetto"):
-- **todo.md** — rimuovere le voci spuntate `[x]`, non spostarle
+- **TODO.md** — rimuovere le voci spuntate `[x]`, non spostarle
 - **CHANGELOG.md** — aggiungere una entry con data e descrizione delle modifiche
 - **CLAUDE.md** — aggiornare sezioni impattate dalle modifiche (stack, struttura, dataset, agent loop)
 
