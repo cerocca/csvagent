@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.7.1] — 2026-06-05
+### Fixed
+- Rimosso codice morto: `rawCsv` / `allRows` duplicati in server.js (BIKE parsing invariato)
+- Fallback `raw_data: {}` → `raw_data: []` in entrambi i return di `runAgent`
+- `buildChart`: guard corretto per gestire sia array che oggetto in `rawData`
+- CSS: `var(--text-muted)` → `var(--muted)` negli header della tabella raw (`.raw-table th`)
+
 ## [0.7.0] — 2026-06-03
 ### Added
 - Session persistence via localStorage: ogni risposta salvata in `csvagent_conv_BIKE` / `csvagent_conv_HOME`

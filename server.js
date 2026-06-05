@@ -19,11 +19,9 @@ app.use(express.json());
 app.use(express.static(join(__dirname, 'public')));
 
 // ─── Load CSV once at startup ─────────────────────────────────────────────────
-const rawCsv = readFileSync(join(__dirname, 'data', 'BIKE.csv'), 'utf8');
-const allRows = parse(rawCsv, { columns: true, skip_empty_lines: true, trim: true });
-
 // The real header is in row 0 of the CSV (row index 0 after parsing has "Unnamed" keys)
 // Re-parse with correct header row
+const rawCsv = readFileSync(join(__dirname, 'data', 'BIKE.csv'), 'utf8');
 const lines = rawCsv.split('\n');
 const dataLines = lines.slice(1).join('\n'); // skip first empty/meta row
 const RECORDS = parse(dataLines, {
@@ -377,7 +375,7 @@ async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt =
       } catch {}
 
       // Fallback: wrap plain text
-      return { summary: text, insights: [], warnings: [], raw_data: {} };
+      return { summary: text, insights: [], warnings: [], raw_data: [] };
     }
 
     if (response.stop_reason === 'tool_use') {
@@ -396,14 +394,14 @@ async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt =
     }
   }
 
-  return { summary: 'Max iterazioni raggiunte.', insights: [], warnings: ['Agent loop terminato per timeout'], raw_data: {} };
+  return { summary: 'Max iterazioni raggiunte.', insights: [], warnings: ['Agent loop terminato per timeout'], raw_data: [] };
 }
 
 const CHART_KEYWORDS = ['grafico', 'chart', 'visualizza', 'mostrami'];
 
 async function buildChart(rawData, question) {
   if (!CHART_KEYWORDS.some(kw => question.toLowerCase().includes(kw))) return null;
-  if (!rawData || Object.keys(rawData).length === 0) return null;
+  if (!rawData || (Array.isArray(rawData) ? rawData.length === 0 : Object.keys(rawData).length === 0)) return null;
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5',
