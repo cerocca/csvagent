@@ -4,6 +4,7 @@
 - [ ] UI language support (IT/EN+) — oggetto LANG inline, selector in toolbar, localStorage
 
 ## 🔧 Code Quality
+- [ ] Unificare documentazione in inglese (CLAUDE.md, SETUP.md, README.md, commenti in server.js)
 
 ## 💡 Feature Backlog
 - [ ] Savings suggestions
