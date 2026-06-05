@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [0.7.2] — 2026-06-05
+### Changed
+- SCHEMA.totalRows → count per allineamento con HOME_SCHEMA
+- Frontend loadSchema(): rimosso workaround `totalRows ?? count`, ora usa solo `count`
+
 ## [0.7.1] — 2026-06-05
 ### Fixed
 - Rimosso codice morto: `rawCsv` / `allRows` duplicati in server.js (BIKE parsing invariato)

@@ -1058,7 +1058,7 @@ function loadSchema() {
   fetch('/api/schema?dataset=' + dataset)
     .then(r => r.json())
     .then(schema => {
-      const rowCount = schema.totalRows ?? schema.count ?? 0;
+      const rowCount = schema.count ?? 0;
       const yrs = schema.years || [];
       const period = yrs.length ? `${yrs[0]}–${yrs.at(-1)}` : '—';
       document.getElementById('schema-total').textContent = rowCount.toLocaleString('it-IT');

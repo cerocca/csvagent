@@ -64,7 +64,7 @@ console.log(`✓ HOME CSV caricato: ${HOME_RECORDS.length} righe, anni ${HOME_SC
 
 const SCHEMA = {
   columns: ['ANNO', 'MESE', 'COSA', 'QUANTO', 'DOVE', 'MOTIVO', 'CATEGORIA', 'NOTE'],
-  totalRows: RECORDS.length,
+  count: RECORDS.length,
   years: [...new Set(RECORDS.map(r => r.ANNO))].sort(),
   months: ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'],
   categories: [...new Set(RECORDS.map(r => r.CATEGORIA))].sort(),

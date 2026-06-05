@@ -5,7 +5,7 @@
 
 ## 🔧 Code Quality
 - [ ] Unificare SYSTEM_PROMPT e HOME_SYSTEM_PROMPT (60% duplicato) — estrarre base comune, specializzare per dataset
-- [ ] Allineare schema keys: SCHEMA.totalRows → count (come HOME_SCHEMA) per eliminare il workaround `totalRows ?? count` nel frontend
+- [x] Allineare schema keys: SCHEMA.totalRows → count (come HOME_SCHEMA) per eliminare il workaround `totalRows ?? count` nel frontend
 
 ## 💡 Feature Backlog
 - [ ] Savings suggestions
