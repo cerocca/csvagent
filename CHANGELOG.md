@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [0.7.3] — 2026-06-05
+### Changed
+- Estratta BASE_PROMPT come costante condivisa tra BIKE e HOME
+- SYSTEM_PROMPT rinominato BIKE_SYSTEM_PROMPT per coerenza
+- HOME_SYSTEM_PROMPT refactored per usare BASE_PROMPT
+- SETUP.md: rowCount → count nell'esempio schema, SYSTEM_PROMPT → BIKE_SYSTEM_PROMPT nel routing
+
 ## [0.7.2] — 2026-06-05
 ### Changed
 - SCHEMA.totalRows → count per allineamento con HOME_SCHEMA

@@ -287,13 +287,7 @@ function executeTool(name, input, records, schema) {
 // ─── Agent loop ───────────────────────────────────────────────────────────────
 const client = new Anthropic();
 
-const SYSTEM_PROMPT = `Sei un agente analitico specializzato in spese personali per il ciclismo.
-Hai accesso a un CSV con ${RECORDS.length} spese dal ${SCHEMA.years[0]} al ${SCHEMA.years.at(-1)}.
-
-Colonne: ANNO, MESE, COSA (descrizione), QUANTO (€), DOVE (vendor), MOTIVO (una tantum/periodico/...), CATEGORIA, NOTE
-Categorie: ${SCHEMA.categories.join(', ')}
-Anni: ${SCHEMA.years.join(', ')}
-
+const BASE_PROMPT = `
 Regole:
 - OBBLIGATORIO: chiama sempre almeno un tool prima di rispondere. Non rispondere mai basandoti su conoscenza propria. Se non riesci a rispondere con i tool disponibili, dillo esplicitamente.
 - Chiama più tool in sequenza se necessario per rispondere bene.
@@ -312,6 +306,14 @@ Regole:
   popola chart con:
   { "type": "bar"|"line"|"pie", "title": "...", "labels": [...], "values": [...] }
   Scegli: line per trend temporali, bar per confronti, pie solo se <= 6 elementi.`;
+
+const BIKE_SYSTEM_PROMPT = `Sei un agente analitico specializzato in spese personali per il ciclismo.
+Hai accesso a un CSV con ${RECORDS.length} spese dal ${SCHEMA.years[0]} al ${SCHEMA.years.at(-1)}.
+
+Colonne: ANNO, MESE, COSA (descrizione), QUANTO (€), DOVE (vendor), MOTIVO (una tantum/periodico/...), CATEGORIA, NOTE
+Categorie: ${SCHEMA.categories.join(', ')}
+Anni: ${SCHEMA.years.join(', ')}
+${BASE_PROMPT}`;
 
 const HOME_SYSTEM_PROMPT = `Sei un agente analitico per spese domestiche e familiari.
 Hai accesso a ${HOME_SCHEMA.count} spese dal ${HOME_SCHEMA.years[0]} al ${HOME_SCHEMA.years.at(-1)}.
@@ -321,29 +323,13 @@ Categorie: ${HOME_SCHEMA.categories.join(', ')}
 Chi: ${HOME_SCHEMA.chi.join(', ')}
 Anni: ${HOME_SCHEMA.years.join(', ')}
 
-Regole:
-- OBBLIGATORIO: chiama sempre almeno un tool prima di rispondere. Non rispondere mai basandoti su conoscenza propria. Se non riesci a rispondere con i tool disponibili, dillo esplicitamente.
-- Chiama più tool in sequenza se necessario per rispondere bene.
-- run_js: esegui codice JS arbitrario su rows. Usa solo metodi nativi JS (filter, reduce, map, sort, Math.*). Non esistono groupBy, sum, o metodi lodash. rows è un array di oggetti con le colonne del dataset selezionato.
-- Rispondi sempre in italiano, in modo conciso e diretto.
+Note specifiche HOME:
 - Per filtrare per mese usa il numero (es. mese: "1" per gennaio).
 - Per filtrare per persona usa il filtro chi (es. chi: "Nicola").
 - I filtri dove e motivo non esistono in questo dataset — non usarli.
-- Output finale DEVE essere JSON con questa struttura esatta:
-{
-  "summary": "risposta principale in 1-2 frasi",
-  "insights": ["insight 1", "insight 2", ...],
-  "warnings": ["warning 1", ...],
-  "raw_data": sempre un array di oggetti quando ci sono righe da mostrare (es. [{campo: valore, ...}, ...]), mai un oggetto flat o wrapper. Array vuoto [] se non ci sono dati da mostrare.,
-  "chart": null
-}
-- chart è null se la domanda non richiede un grafico.
-- Se la domanda contiene "grafico", "chart", "visualizza", "mostrami" o simili,
-  popola chart con:
-  { "type": "bar"|"line"|"pie", "title": "...", "labels": [...], "values": [...] }
-  Scegli: line per trend temporali, bar per confronti, pie solo se <= 6 elementi.`;
+${BASE_PROMPT}`;
 
-async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt = SYSTEM_PROMPT, records = RECORDS, schema = SCHEMA, history = []) {
+async function runAgent(userQuestion, model = 'claude-haiku-4-5', systemPrompt = BIKE_SYSTEM_PROMPT, records = RECORDS, schema = SCHEMA, history = []) {
   const messages = [...history, { role: 'user', content: userQuestion }];
 
   let iterations = 0;
@@ -426,7 +412,7 @@ app.post('/api/ask', async (req, res) => {
   if (!question?.trim()) return res.status(400).json({ error: 'question mancante' });
 
   const ds = DATASETS[dataset] ?? DATASETS.BIKE;
-  const systemPrompt = dataset === 'HOME' ? HOME_SYSTEM_PROMPT : SYSTEM_PROMPT;
+  const systemPrompt = dataset === 'HOME' ? HOME_SYSTEM_PROMPT : BIKE_SYSTEM_PROMPT;
 
   console.log(`\n→ [${new Date().toISOString()}] [${dataset}] "${question}"`);
 

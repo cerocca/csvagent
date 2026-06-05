@@ -56,7 +56,7 @@ const YEAR  = date.year();
 ```js
 const MY_SCHEMA = {
   columns: ['FIELD1', 'FIELD2', 'YEAR'],
-  rowCount: MY_RECORDS.length,
+  count: MY_RECORDS.length,
   period: '2020–2025'
 };
 ```
@@ -90,7 +90,7 @@ In the `/api/ask` handler:
 const systemPrompt =
   dataset === 'HOME'   ? HOME_SYSTEM_PROMPT   :
   dataset === 'MYDATA' ? MYDATA_SYSTEM_PROMPT :
-  SYSTEM_PROMPT;
+  BIKE_SYSTEM_PROMPT;
 ```
 
 ### 7. Add the selector in UI

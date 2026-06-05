@@ -47,6 +47,7 @@ CHI values: Nicola, Leti, Shared
 - Modello: selezionabile dal body /api/ask, default claude-haiku-4-5
 - Tool disponibili: query_data (operation: list/sum/avg/count/group_by/top_n/trend/anomalies), run_js (codice JS arbitrario su rows, timeout 3s)
 - Schema iniettato nel system prompt (no tool get_schema)
+- System prompt: BASE_PROMPT condivisa + BIKE_SYSTEM_PROMPT / HOME_SYSTEM_PROMPT per dataset
 - Prompt caching attivo sul system prompt (cache_control: ephemeral)
 - Output strutturato: { summary, insights[], warnings[], raw_data }
 - Conversational history: `history[]` passato dal client nel body di /api/ask; `messages` = `[...history, { role: 'user', content }]`

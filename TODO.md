@@ -4,8 +4,6 @@
 - [ ] UI language support (IT/EN+) — oggetto LANG inline, selector in toolbar, localStorage
 
 ## 🔧 Code Quality
-- [ ] Unificare SYSTEM_PROMPT e HOME_SYSTEM_PROMPT (60% duplicato) — estrarre base comune, specializzare per dataset
-- [x] Allineare schema keys: SCHEMA.totalRows → count (come HOME_SCHEMA) per eliminare il workaround `totalRows ?? count` nel frontend
 
 ## 💡 Feature Backlog
 - [ ] Savings suggestions
