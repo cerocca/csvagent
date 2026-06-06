@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [0.7.4] - 2026-06-06
+
+### Added
+- Three input modes via pill buttons above ask-shell: Domanda (default), Report, Suggerimenti
+- `POST /api/report`: generates standalone HTML report with Chart.js using pre-aggregated data
+- `POST /api/suggest`: generates standalone HTML suggestions report with savings estimates
+- `aggregateForReport()` helper in server.js: pre-aggregates rows to avoid token limits on large datasets
+- Toast notifications for long-running operations (in progress + download complete)
+- CSS vars: `--gold`, `--gold-soft`, `--positive-soft`
+- `setMode()`, `runAction()`, `showToast()` JS functions in index.html
+
+### Fixed
+- Chart.js DOMContentLoaded constraint in report/suggest prompts to fix empty chart rendering
+
 ## [0.7.3] — 2026-06-05
 ### Changed
 - Estratta BASE_PROMPT come costante condivisa tra BIKE e HOME

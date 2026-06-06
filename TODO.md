@@ -6,10 +6,6 @@
 ## 🔧 Code Quality
 - [ ] Unificare documentazione in inglese (CLAUDE.md, SETUP.md, README.md, commenti in server.js)
 
-## 💡 Feature Backlog
-- [ ] Savings suggestions
-- [ ] HTML report generation (scaricabile)
-
 ## 🔵 Future / Explorations
 - [ ] OpenRouter migration — requires agent loop rewrite, not drop-in compatible with @anthropic-ai/sdk
 

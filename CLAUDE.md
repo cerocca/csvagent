@@ -52,6 +52,13 @@ CHI values: Nicola, Leti, Shared
 - Output strutturato: { summary, insights[], warnings[], raw_data }
 - Conversational history: `history[]` passato dal client nel body di /api/ask; `messages` = `[...history, { role: 'user', content }]`
 
+## API Routes
+- `POST /api/ask` — agent loop conversazionale, dataset-aware, model selezionabile
+- `GET /api/schema?dataset=BIKE|HOME` — restituisce schema del dataset
+- `GET /api/version` — versione da package.json
+- `POST /api/report` — genera report HTML standalone con dati aggregati, model: claude-sonnet-4-5
+- `POST /api/suggest` — genera suggerimenti risparmio HTML standalone, model: claude-sonnet-4-5
+
 ## WebUI — toolbar
 - Select dataset: 🚴 Ciclismo / 🏠 Casa (reset history al cambio)
 - Select modello: Haiku / Sonnet / Opus

@@ -1,6 +1,6 @@
 # csvagent
 
-![version](https://img.shields.io/badge/version-0.6.0-blue)
+![version](https://img.shields.io/badge/version-0.7.4-blue)
 ![node](https://img.shields.io/badge/node-ESM-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -14,6 +14,8 @@
 - Conversational history with configurable sliding window
 - Chart rendering (bar, line, pie) via Chart.js
 - Dark/light theme, model selector (Haiku / Sonnet / Opus)
+- Three input modes: 💬 Domanda (conversational Q&A), 📊 Report (downloadable HTML report with charts), 💡 Suggerimenti (downloadable savings analysis with priority recommendations)
+- Standalone HTML file download for Report and Suggerimenti modes (no server dependency, Chart.js embedded via CDN)
 
 ## Stack
 

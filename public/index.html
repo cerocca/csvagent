@@ -25,6 +25,9 @@
     --warn: #B05A3C;
     --warn-soft: #F1DFD3;
     --positive: #5A8A6F;
+    --positive-soft: #D9EDE1;
+    --gold: #8A6A00;
+    --gold-soft: #F5EDD0;
 
     --c1: #2F5D52;
     --c2: #B05A3C;
@@ -800,6 +803,9 @@
     .empty-state { padding: 2rem 1rem; }
     .empty-state .figure { font-size: 3rem; }
     .empty-state h3 { font-size: 1.2rem; }
+    .mode-btn { font-size: 0.72rem; padding: 0.3rem 0.55rem; height: 28px; }
+    .action-panel { flex-direction: column; align-items: stretch; }
+    .run-btn { width: 100%; justify-content: center; }
   }
 
   /* Dark theme */
@@ -878,6 +884,115 @@
     font-size: 0.78rem;
     color: var(--muted);
     padding: 0.4rem 0.2rem;
+  }
+
+  /* Mode row */
+  .mode-row {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.65rem;
+  }
+  .mode-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-soft);
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .mode-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .mode-btn.active-chat { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+  .mode-btn.active-report { background: var(--gold-soft); border-color: var(--gold); color: var(--gold); }
+  .mode-btn.active-suggest { background: var(--positive-soft); border-color: var(--positive); color: var(--accent-ink); }
+
+  /* Action panel */
+  .action-panel {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.35rem 0.25rem;
+  }
+  .action-desc {
+    font-size: 0.88rem;
+    color: var(--text-soft);
+    line-height: 1.4;
+  }
+  .action-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .run-btn {
+    background: var(--accent);
+    color: var(--surface);
+    border: none;
+    padding: 0 1.1rem;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    height: 40px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .run-btn:hover { background: var(--accent-ink); }
+  .run-btn:active { transform: scale(0.98); }
+  .run-btn:disabled { background: var(--border-strong); cursor: wait; }
+  .run-btn.r { background: var(--gold); }
+  .run-btn.r:hover { background: #7A5C00; }
+  .run-btn.s { background: var(--positive); }
+  .run-btn.s:hover { background: #4A7A5F; }
+
+  /* Toast */
+  .toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast-msg {
+    background: var(--text);
+    color: #E8E2D5;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-sm);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: var(--shadow);
+    animation: fadeIn 0.2s ease;
+    pointer-events: auto;
+    min-width: 200px;
+    max-width: 320px;
+  }
+  .toast-msg.toast-ok { background: var(--accent); }
+  .toast-msg.toast-err { background: var(--warn); }
+  .toast-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
   }
 </style>
 </head>
@@ -967,6 +1082,11 @@
 
   <main class="main">
     <div class="ask-bar">
+      <div class="mode-row">
+        <button class="mode-btn active-chat" id="mode-chat" onclick="setMode('chat')">💬 Domanda</button>
+        <button class="mode-btn" id="mode-report" onclick="setMode('report')">📊 Report</button>
+        <button class="mode-btn" id="mode-suggest" onclick="setMode('suggest')">💡 Suggerimenti</button>
+      </div>
       <div class="ask-shell">
         <textarea id="question" placeholder="Chiedi qualcosa sui tuoi dati…" rows="1"></textarea>
         <div class="ctrl-row">
@@ -986,6 +1106,13 @@
           <button class="resume-btn" id="resume-btn" onclick="resumeSession()" title="Riprendi sessione precedente" style="display:none">↩ Riprendi</button>
           <button class="new-btn" id="new-btn" onclick="resetHistory()" title="Nuova conversazione">↺ Nuova</button>
           <button class="ask-btn" id="send-btn" onclick="submitQuestion()">Chiedi <span style="opacity:0.7">↵</span></button>
+        </div>
+        <div class="action-panel" id="action-panel" style="display:none">
+          <div>
+            <div class="action-desc" id="action-desc"></div>
+            <div class="action-meta" id="action-meta"></div>
+          </div>
+          <button class="run-btn" id="run-btn" onclick="runAction()"></button>
         </div>
       </div>
     </div>
@@ -1026,6 +1153,112 @@ document.addEventListener('keydown', e => {
 
 /* App logic */
 let conversationHistory = [];
+let currentMode = 'chat';
+
+const MODE_CONFIG = {
+  report: {
+    text: 'Genera un report HTML completo con grafici, trend per anno e categoria, top 20 voci e osservazioni.',
+    meta: 'Richiede ~30s · Modello: Sonnet · Output: file .html',
+    btnLabel: '📊 Genera report',
+    btnClass: 'r',
+    toastText: 'Generazione report in corso',
+    toastSub: 'Potrebbe richiedere 30-60 secondi',
+    spinnerClass: 'toast-spinner',
+    endpoint: '/api/report',
+    filename: (ds) => `report_${ds.toLowerCase()}_${new Date().toISOString().slice(0,10)}.html`
+  },
+  suggest: {
+    text: 'Analizza i pattern di spesa e genera suggerimenti personalizzati per ridurre i costi, con stime di risparmio.',
+    meta: 'Richiede ~30s · Modello: Sonnet · Output: file .html',
+    btnLabel: '💡 Genera suggerimenti',
+    btnClass: 's',
+    toastText: 'Analisi pattern di spesa',
+    toastSub: 'Potrebbe richiedere 30-60 secondi',
+    spinnerClass: 'toast-spinner',
+    endpoint: '/api/suggest',
+    filename: (ds) => `suggerimenti_${ds.toLowerCase()}_${new Date().toISOString().slice(0,10)}.html`
+  }
+};
+
+function setMode(mode) {
+  currentMode = mode;
+  ['chat', 'report', 'suggest'].forEach(m => {
+    document.getElementById('mode-' + m).className = 'mode-btn' + (mode === m ? ' active-' + m : '');
+  });
+  const textarea = document.getElementById('question');
+  const sendBtn = document.getElementById('send-btn');
+  const actionPanel = document.getElementById('action-panel');
+  if (mode === 'chat') {
+    textarea.style.display = '';
+    sendBtn.style.display = '';
+    actionPanel.style.display = 'none';
+  } else {
+    const cfg = MODE_CONFIG[mode];
+    textarea.style.display = 'none';
+    sendBtn.style.display = 'none';
+    document.getElementById('action-desc').textContent = cfg.text;
+    document.getElementById('action-meta').textContent = cfg.meta;
+    const runBtn = document.getElementById('run-btn');
+    runBtn.textContent = cfg.btnLabel;
+    runBtn.className = 'run-btn ' + cfg.btnClass;
+    actionPanel.style.display = '';
+  }
+}
+
+function showToast(cfg, done, filename) {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast-msg';
+  if (done === true) {
+    el.className += ' toast-ok';
+    el.innerHTML = `<span>✓</span><span>Salvato come <strong>${escapeHtml(filename)}</strong></span>`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  } else if (done === 'error') {
+    el.className += ' toast-err';
+    el.innerHTML = `<span>✗</span><span>${escapeHtml(filename)}</span>`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+    return el;
+  } else {
+    el.innerHTML = `<div class="${cfg.spinnerClass}"></div><div><div>${cfg.toastText}…</div><div style="font-size:0.72rem;opacity:0.7;margin-top:2px">${cfg.toastSub}</div></div>`;
+    container.appendChild(el);
+    return el;
+  }
+}
+
+async function runAction() {
+  if (currentMode === 'chat') return;
+  const cfg = MODE_CONFIG[currentMode];
+  const dataset = document.getElementById('dataset-select').value;
+  const runBtn = document.getElementById('run-btn');
+  runBtn.disabled = true;
+  const toastEl = showToast(cfg, false, null);
+  try {
+    const r = await fetch(cfg.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataset })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const html = await r.text();
+    const filename = cfg.filename(dataset);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    if (toastEl) toastEl.remove();
+    showToast(cfg, true, filename);
+  } catch (err) {
+    if (toastEl) toastEl.remove();
+    showToast(cfg, 'error', err.message);
+  } finally {
+    runBtn.disabled = false;
+  }
+}
 
 document.getElementById('dataset-select').addEventListener('change', () => {
   conversationHistory = [];
@@ -1502,5 +1735,6 @@ function renderChart(canvas, chartData) {
   });
 }
 </script>
+<div class="toast-container" id="toast-container"></div>
 </body>
 </html>

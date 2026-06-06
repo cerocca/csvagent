@@ -434,6 +434,140 @@ app.get('/api/schema', (req, res) => {
 
 app.get('/api/version', (_, res) => res.json({ version }));
 
+// ─── Pre-aggregation helper ───────────────────────────────────────────────────
+function aggregateForReport(rows) {
+  const totalRows = rows.length;
+  const years = [...new Set(rows.map(r => r.ANNO))].sort((a, b) => a - b);
+  const categories = [...new Set(rows.map(r => r.CATEGORIA))].sort();
+
+  const byYear = {};
+  const byCategory = {};
+  const monthlySeries = {};
+
+  for (const r of rows) {
+    byYear[r.ANNO] = (byYear[r.ANNO] || 0) + r.QUANTO;
+    byCategory[r.CATEGORIA] = (byCategory[r.CATEGORIA] || 0) + r.QUANTO;
+    if (!monthlySeries[r.ANNO]) monthlySeries[r.ANNO] = {};
+    monthlySeries[r.ANNO][r.MESE] = (monthlySeries[r.ANNO][r.MESE] || 0) + r.QUANTO;
+  }
+
+  for (const k of Object.keys(byYear)) byYear[k] = Math.round(byYear[k] * 100) / 100;
+  for (const k of Object.keys(byCategory)) byCategory[k] = Math.round(byCategory[k] * 100) / 100;
+
+  const topItems = [...rows]
+    .sort((a, b) => b.QUANTO - a.QUANTO)
+    .slice(0, 20)
+    .map(r => ({ descrizione: r.COSA || '—', QUANTO: r.QUANTO, CATEGORIA: r.CATEGORIA, anno: r.ANNO }));
+
+  return { totalRows, years, categories, byYear, byCategory, topItems, monthlySeries };
+}
+
+// ─── Route POST /api/report ───────────────────────────────────────────────────
+app.post('/api/report', async (req, res) => {
+  const { dataset = 'BIKE' } = req.body;
+  const ds = DATASETS[dataset] ?? DATASETS.BIKE;
+  const agg = aggregateForReport(ds.records);
+  const today = new Date().toLocaleDateString('it-IT');
+  const label = dataset === 'BIKE' ? 'Ciclismo' : 'Casa';
+
+  const prompt = `Sei un esperto di analisi finanziaria. Genera un report HTML standalone completo per le spese di ${label.toLowerCase()}.
+
+Dati pre-aggregati:
+- Righe totali: ${agg.totalRows}
+- Anni: ${agg.years.join(', ')}
+- Categorie: ${agg.categories.join(', ')}
+- Totale per anno (€): ${JSON.stringify(agg.byYear)}
+- Totale per categoria (€): ${JSON.stringify(agg.byCategory)}
+- Top 20 voci per importo: ${JSON.stringify(agg.topItems)}
+- Serie mensile: ${JSON.stringify(agg.monthlySeries)}
+
+Genera un file HTML completo e standalone con:
+1. CSS inline (nessun file esterno eccetto Chart.js da CDN: https://cdn.jsdelivr.net/npm/chart.js)
+2. Data di generazione: ${today}
+3. Sezioni:
+   a. Riepilogo generale (totale assoluto, media annua, anno con spesa più alta e più bassa)
+   b. Spesa per anno con grafico a barre
+   c. Spesa per categoria con grafico a ciambella
+   d. Top 20 voci di spesa in tabella ordinata per importo
+   e. Osservazioni e trend notevoli
+4. Stile: pulito, professionale, font di sistema, colori sobri, responsive
+5. Titolo: "Report spese ${label} — ${today}"
+6. Vincoli obbligatori per i grafici Chart.js:
+   - Tutti i grafici devono essere inizializzati dentro un listener DOMContentLoaded: document.addEventListener('DOMContentLoaded', () => { ... })
+   - Ogni canvas deve avere un id univoco
+   - Ogni new Chart() deve avere labels e data sempre validi (mai undefined o array vuoti)
+   - Non dichiarare variabili con const/let fuori da funzioni se vengono usate dentro callback
+
+Restituisci SOLO il codice HTML, senza markdown, senza backtick, senza testo aggiuntivo.`;
+
+  try {
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }]
+    });
+    const html = response.content.find(b => b.type === 'text')?.text ?? '';
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (err) {
+    console.error('Report error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Route POST /api/suggest ──────────────────────────────────────────────────
+app.post('/api/suggest', async (req, res) => {
+  const { dataset = 'BIKE' } = req.body;
+  const ds = DATASETS[dataset] ?? DATASETS.BIKE;
+  const agg = aggregateForReport(ds.records);
+  const today = new Date().toLocaleDateString('it-IT');
+  const label = dataset === 'BIKE' ? 'Ciclismo' : 'Casa';
+
+  const prompt = `Sei un consulente finanziario personale. Analizza i pattern di spesa per ${label.toLowerCase()} e genera suggerimenti pratici di risparmio.
+
+Dati pre-aggregati:
+- Righe totali: ${agg.totalRows}
+- Anni: ${agg.years.join(', ')}
+- Categorie: ${agg.categories.join(', ')}
+- Totale per anno (€): ${JSON.stringify(agg.byYear)}
+- Totale per categoria (€): ${JSON.stringify(agg.byCategory)}
+- Top 20 voci per importo: ${JSON.stringify(agg.topItems)}
+- Serie mensile: ${JSON.stringify(agg.monthlySeries)}
+
+Genera un file HTML completo e standalone con:
+1. CSS inline (nessun file esterno eccetto Chart.js da CDN: https://cdn.jsdelivr.net/npm/chart.js)
+2. Data di generazione: ${today}
+3. Sezioni:
+   a. Sintesi dei pattern di spesa identificati
+   b. Categorie con maggior margine di risparmio (con stima € risparmio annuo)
+   c. Almeno 5 suggerimenti specifici e actionable, ciascuno con: descrizione, stima risparmio in €/anno, priorità (Alta/Media/Bassa)
+   d. Grafico a barre delle categorie per importo totale
+   e. Piano d'azione con priorità
+4. Stile: pulito, professionale, indicatori visivi per priorità (rosso=Alta, arancio=Media, verde=Bassa)
+5. Titolo: "Suggerimenti di risparmio — ${label} — ${today}"
+6. Vincoli obbligatori per i grafici Chart.js:
+   - Tutti i grafici devono essere inizializzati dentro un listener DOMContentLoaded: document.addEventListener('DOMContentLoaded', () => { ... })
+   - Ogni canvas deve avere un id univoco
+   - Ogni new Chart() deve avere labels e data sempre validi (mai undefined o array vuoti)
+   - Non dichiarare variabili con const/let fuori da funzioni se vengono usate dentro callback
+
+Restituisci SOLO il codice HTML, senza markdown, senza backtick, senza testo aggiuntivo.`;
+
+  try {
+    const response = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 8192,
+      messages: [{ role: 'user', content: prompt }]
+    });
+    const html = response.content.find(b => b.type === 'text')?.text ?? '';
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (err) {
+    console.error('Suggest error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`\n🚲 csvagent running → http://localhost:${PORT}`);
   console.log(`   API key: ${process.env.ANTHROPIC_API_KEY ? '✓' : '✗ MANCANTE'}\n`);
