@@ -6,7 +6,7 @@
 <title>csvagent · le mie spese</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300..700&family=Inter+Tight:wght@300..700&family=Plus+Jakarta+Sans:wght@300..700&family=Manrope:wght@300..700&family=Instrument+Serif&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
@@ -142,7 +142,7 @@
 
   .brand {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 0.65rem;
   }
 
@@ -368,7 +368,7 @@
     font-size: 0.95rem;
     padding: 0.55rem 0.25rem 0.4rem;
     resize: none;
-    min-height: 32px;
+    min-height: 40px;
     line-height: 1.4;
     outline: none;
     width: 100%;
@@ -410,7 +410,7 @@
     font-size: 0.85rem;
     cursor: pointer;
     height: 40px;
-    border-radius: 9px;
+    border-radius: 8px;
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -430,7 +430,7 @@
     cursor: pointer;
     height: 40px;
     padding: 0 0.85rem;
-    border-radius: 9px;
+    border-radius: 8px;
     transition: all 0.15s;
   }
   .new-btn:hover { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
@@ -445,7 +445,7 @@
     cursor: pointer;
     height: 40px;
     padding: 0 0.85rem;
-    border-radius: 9px;
+    border-radius: 8px;
     transition: all 0.15s;
   }
   .resume-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
@@ -747,7 +747,7 @@
   ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-  @media (max-width: 720px) {
+  @media (max-width: 900px) {
     .ask-shell { grid-template-columns: 1fr; }
     .ask-shell .ctrl-row,
     .ask-shell .ask-actions { grid-column: 1; justify-self: stretch; }
@@ -857,6 +857,7 @@
     gap: 0.3rem;
     max-height: 200px;
     overflow-y: auto;
+    scrollbar-gutter: stable;
   }
   .history-item {
     background: var(--surface);
@@ -1034,7 +1035,7 @@
           <option value="HOME">🏠 Casa</option>
         </select>
         <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">
-          <span id="theme-icon">☀</span>
+          <span id="theme-icon">☀️</span>
           <span id="theme-label">Chiaro</span>
         </button>
       </div>

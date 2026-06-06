@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [0.7.6] - 2026-06-06
+
+### Fixed (design review — public/index.html only)
+- **Font loading (LCP)**: Google Fonts link ridotto da 8 a 3 famiglie (DM Sans, Instrument Serif, JetBrains Mono); rimosse Inter Tight, Plus Jakarta Sans, Manrope, Fraunces, DM Serif Display
+- **Emoji ☀**: aggiunto variation selector U+FE0F (☀️) per rendering colorato cross-browser/OS
+- **Brand alignment**: `.brand` da `align-items: baseline` a `align-items: center` per allineamento corretto tra brand-mark e h1
+- **Textarea height**: `min-height` portata da 32px a 40px, allineandola all'altezza del bottone Chiedi
+- **Border-radius coerenza**: `.ask-btn`, `.new-btn`, `.resume-btn` uniformati a `border-radius: 8px` (era 9px); `.ctrl` già a 8px; `.mode-btn` (pill) invariato
+- **Breakpoint orfano**: `@media (max-width: 720px)` per ask-shell stack verticale portato a `900px`, allineandolo al breakpoint del drawer sidebar
+- **Scrollbar history-list**: aggiunto `scrollbar-gutter: stable` per evitare layout shift quando appare la scrollbar
+
 ## [0.7.5] - 2026-06-06
 
 ### Changed
