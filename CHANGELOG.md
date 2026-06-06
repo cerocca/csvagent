@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [0.7.5] - 2026-06-06
+
+### Changed
+- CLAUDE.md: translated to English; added i18n planned note to WebUI section
+- README.md: added i18n planned note to Features section
+- server.js: translated 4 inline comments to English
+- TODO.md: removed completed "Code Quality" section; collapsed "Option B" into single bullet under "Future / Explorations"; moved i18n item to "Future / Explorations"; removed empty "UX / WebUI" section
+
+### Notes
+- SETUP.md: no changes needed, was already in English
+- UI language remains Italian only; i18n planned for a future release
+
 ## [0.7.4] - 2026-06-06
 
 ### Added

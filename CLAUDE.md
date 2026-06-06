@@ -1,7 +1,7 @@
-# csvagent — contesto per Claude Code
+# csvagent — context for Claude Code
 
-## Cos'è
-Agent Node.js che analizza CSV di spese personali via browser.
+## What it is
+Node.js agent that analyzes personal expense CSVs via a browser interface.
 Express + Claude API (tool calling) + agentic loop.
 
 ## Stack
@@ -10,97 +10,98 @@ Express + Claude API (tool calling) + agentic loop.
 - @anthropic-ai/sdk ^0.95.0
 - csv-parse ^5.5.6
 - dotenv ^17.4.2
-- dayjs (date parsing HOME dataset, con customParseFormat plugin)
-- PM2 per persistenza
+- dayjs (date parsing for HOME dataset, with customParseFormat plugin)
+- PM2 for persistence
 
-## Struttura
+## Structure
 ```
 csvagent/
 ├── server.js          # entry point — Express + agent loop + tools
-├── public/index.html  # WebUI — form domanda + visualizzazione risposta
-├── ecosystem.config.cjs  # configurazione PM2
+├── public/index.html  # WebUI — question form + response display
+├── ecosystem.config.cjs  # PM2 configuration
 ├── data/
-│   ├── BIKE.csv       # spese ciclismo, 403 righe, 2016–2025
-│   └── HOME.csv       # spese casa/famiglia, 4037 righe, 2014–2025
+│   ├── BIKE.csv       # cycling expenses, 403 rows, 2016–2025
+│   └── HOME.csv       # household/family expenses, 4037 rows, 2014–2025
 ├── .env               # ANTHROPIC_API_KEY
-├── CLAUDE.md          # questo file
-├── TODO.md            # task aperti
-└── CHANGELOG.md       # storia delle modifiche
+├── CLAUDE.md          # this file
+├── TODO.md            # open tasks
+└── CHANGELOG.md       # change history
 ```
 
-## Dataset BIKE
-Colonne: ANNO, MESE, COSA, QUANTO, DOVE, MOTIVO, CATEGORIA, NOTE
-Prima riga del CSV è vuota — il parser la skippa (slice(1))
-QUANTO può essere negativo (rimborsi)
+## BIKE Dataset
+Columns: ANNO, MESE, COSA, QUANTO, DOVE, MOTIVO, CATEGORIA, NOTE
+First CSV row is empty — the parser skips it (slice(1))
+QUANTO can be negative (refunds)
 
-## Dataset HOME
-Colonne originali CSV: CHI, DOVE, QUANTO, CAT, QUANDO, MESE, ANNO
-Colonne in memoria: CHI, COSA (←DOVE), QUANTO, CATEGORIA (←CAT), QUANDO
-MESE e ANNO derivati da QUANDO (formato d/m/yyyy o dd/mm/yyyy) via dayjs
-CATEGORIA normalizzata: .trim().toLowerCase()
-SharedN e SharedL → rinominati Shared (senza deduplicare le righe)
+## HOME Dataset
+Original CSV columns: CHI, DOVE, QUANTO, CAT, QUANDO, MESE, ANNO
+In-memory columns: CHI, COSA (←DOVE), QUANTO, CATEGORIA (←CAT), QUANDO
+MESE and ANNO derived from QUANDO (format d/m/yyyy or dd/mm/yyyy) via dayjs
+CATEGORIA normalized: .trim().toLowerCase()
+SharedN and SharedL → renamed to Shared (without deduplicating rows)
 CHI values: Nicola, Leti, Shared
 
 ## Agent loop
-- Max iterazioni: 5
+- Max iterations: 5
 - max_tokens: 1024
-- Modello: selezionabile dal body /api/ask, default claude-haiku-4-5
-- Tool disponibili: query_data (operation: list/sum/avg/count/group_by/top_n/trend/anomalies), run_js (codice JS arbitrario su rows, timeout 3s)
-- Schema iniettato nel system prompt (no tool get_schema)
-- System prompt: BASE_PROMPT condivisa + BIKE_SYSTEM_PROMPT / HOME_SYSTEM_PROMPT per dataset
-- Prompt caching attivo sul system prompt (cache_control: ephemeral)
-- Output strutturato: { summary, insights[], warnings[], raw_data }
-- Conversational history: `history[]` passato dal client nel body di /api/ask; `messages` = `[...history, { role: 'user', content }]`
+- Model: selectable from /api/ask body, default claude-haiku-4-5
+- Available tools: query_data (operation: list/sum/avg/count/group_by/top_n/trend/anomalies), run_js (arbitrary JS code on rows, 3s timeout)
+- Schema injected into system prompt (no get_schema tool)
+- System prompt: shared BASE_PROMPT + BIKE_SYSTEM_PROMPT / HOME_SYSTEM_PROMPT per dataset
+- Prompt caching active on system prompt (cache_control: ephemeral)
+- Structured output: { summary, insights[], warnings[], raw_data }
+- Conversational history: `history[]` passed by client in /api/ask body; `messages` = `[...history, { role: 'user', content }]`
 
 ## API Routes
-- `POST /api/ask` — agent loop conversazionale, dataset-aware, model selezionabile
-- `GET /api/schema?dataset=BIKE|HOME` — restituisce schema del dataset
-- `GET /api/version` — versione da package.json
-- `POST /api/report` — genera report HTML standalone con dati aggregati, model: claude-sonnet-4-5
-- `POST /api/suggest` — genera suggerimenti risparmio HTML standalone, model: claude-sonnet-4-5
+- `POST /api/ask` — conversational agent loop, dataset-aware, model selectable
+- `GET /api/schema?dataset=BIKE|HOME` — returns dataset schema
+- `GET /api/version` — version from package.json
+- `POST /api/report` — generates standalone HTML report with aggregated data, model: claude-sonnet-4-5
+- `POST /api/suggest` — generates savings suggestions standalone HTML, model: claude-sonnet-4-5
 
 ## WebUI — toolbar
-- Select dataset: 🚴 Ciclismo / 🏠 Casa (reset history al cambio)
-- Select modello: Haiku / Sonnet / Opus
-- Select window size: 4 / 6 / 10 / 20 messaggi (default 6) — sliding window sulla history prima di ogni invio
-- Bottone NEW: azzera conversationHistory[], cancella chiave localStorage del dataset attivo, ripristina empty state; pulisce le card residue alla prima domanda successiva
-- Bottone "↩ Riprendi": appare solo se esiste una sessione salvata per il dataset attivo; ripristina cards e conversationHistory[] da localStorage
+- Dataset select: 🚴 Ciclismo / 🏠 Casa (history reset on change)
+- Model select: Haiku / Sonnet / Opus
+- Window size select: 4 / 6 / 10 / 20 messages (default 6) — sliding window on history before each send
+- NEW button: clears conversationHistory[], removes active dataset's localStorage key, restores empty state; clears residual cards on next question
+- "↩ Riprendi" button: appears only if a saved session exists for the active dataset; restores cards and conversationHistory[] from localStorage
+- UI language: Italian only. Internationalization (i18n) planned for a future release.
 
-## WebUI — sidebar CRONOLOGIA
-- Sezione nella sidebar tra DATI e SCHEMA
-- `renderHistoryList()`: legge localStorage (stessa chiave della sessione attiva), mostra le domande dalla più recente alla più vecchia
-- Ogni voce: testo troncato a 40 caratteri, `title` con testo completo; click → `showSavedResult()` monta la card via `buildCard()` senza API call e senza modificare `conversationHistory[]`
-- Lista vuota: testo muted "Nessuna cronologia"
-- Aggiornamento automatico dopo `saveSession`, `clearSession`, `resumeSession`, cambio dataset, init
+## WebUI — CRONOLOGIA sidebar
+- Section in sidebar between DATI and SCHEMA
+- `renderHistoryList()`: reads localStorage (same key as active session), shows questions from most recent to oldest
+- Each entry: text truncated to 40 chars, `title` with full text; click → `showSavedResult()` mounts card via `buildCard()` without API call and without modifying `conversationHistory[]`
+- Empty list: muted text "Nessuna cronologia"
+- Auto-updated after `saveSession`, `clearSession`, `resumeSession`, dataset change, init
 
 ## WebUI — localStorage session
-- Chiave: `csvagent_conv_BIKE` o `csvagent_conv_HOME` (dipende dal dataset attivo)
-- Struttura: `[{ question, result }]` dove `result` è il JSON completo (summary, insights, warnings, raw_data, chart)
-- Salvataggio: automatico ad ogni risposta ricevuta
-- Ripristino: manuale via bottone "↩ Riprendi" (mai automatico al reload o al cambio dataset)
-- Cambio dataset: aggiorna visibilità bottone Riprendi senza ripristinare
-- Errori (quota, ecc.): gestiti silenziosamente con try/catch
+- Key: `csvagent_conv_BIKE` or `csvagent_conv_HOME` (depends on active dataset)
+- Structure: `[{ question, result }]` where `result` is the full JSON (summary, insights, warnings, raw_data, chart)
+- Save: automatic on each response received
+- Restore: manual via "↩ Riprendi" button (never automatic on reload or dataset change)
+- Dataset change: updates Riprendi button visibility without restoring
+- Errors (quota, etc.): handled silently with try/catch
 
-## Convenzioni commit
-- Ogni commit include sempre il co-autore:
+## Commit conventions
+- Every commit always includes the co-author:
   `Co-authored-by: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
-## Regole di modifica
-- Non toccare parti non correlate al task
-- Modifiche minime e sicure
-- Mantieni backward compatibility
-- Mostra diff e aspetta conferma per: modifiche a logica, system prompt, architettura, route, tool
-- Applica direttamente senza chiedere per: rimozione log, aggiornamento documentazione, modifiche CSS, cleanup
-- Testa con `node server.js` dopo ogni modifica
-- Se il server non parte, controlla prima `ANTHROPIC_API_KEY` nel .env
+## Editing rules
+- Do not touch parts unrelated to the task
+- Minimal and safe changes
+- Maintain backward compatibility
+- Show diff and wait for confirmation for: logic changes, system prompt, architecture, routes, tools
+- Apply directly without asking for: log removal, documentation updates, CSS changes, cleanup
+- Test with `node server.js` after each change
+- If the server doesn't start, check `ANTHROPIC_API_KEY` in .env first
 
-## Documentazione
-Quando viene richiesto di aggiornare la documentazione (o "tutti i file .md del progetto"):
-- **TODO.md** — rimuovere le voci spuntate `[x]`, non spostarle
-- **CHANGELOG.md** — aggiungere una entry con data e descrizione delle modifiche
-- **CLAUDE.md** — aggiornare sezioni impattate dalle modifiche (stack, struttura, dataset, agent loop)
+## Documentation
+When asked to update documentation (or "all .md files in the project"):
+- **TODO.md** — remove checked items `[x]`, do not move them
+- **CHANGELOG.md** — add an entry with date and description of changes
+- **CLAUDE.md** — update sections affected by changes (stack, structure, dataset, agent loop)
 
-## Comandi utili
+## Useful commands
 ```bash
 pm2 start server.js --name csvagent
 pm2 restart csvagent

@@ -16,6 +16,7 @@
 - Dark/light theme, model selector (Haiku / Sonnet / Opus)
 - Three input modes: 💬 Domanda (conversational Q&A), 📊 Report (downloadable HTML report with charts), 💡 Suggerimenti (downloadable savings analysis with priority recommendations)
 - Standalone HTML file download for Report and Suggerimenti modes (no server dependency, Chart.js embedded via CDN)
+- UI language: Italian only. Internationalization (i18n) planned for a future release.
 
 ## Stack
 

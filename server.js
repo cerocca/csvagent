@@ -235,7 +235,7 @@ function executeTool(name, input, records, schema) {
       case 'trend': {
         const hasYearFilter = filters.anno !== undefined;
         if (hasYearFilter) {
-          // trend per mese
+          // trend by month
           const grouped = {};
           for (const r of rows) {
             const key = r.MESE ?? 'N/A';
@@ -244,19 +244,19 @@ function executeTool(name, input, records, schema) {
           }
           let result;
           if (schema.months) {
-            // BIKE: ordina per nome mese italiano
+            // BIKE: sort by Italian month name
             result = schema.months
               .filter(m => grouped[m] !== undefined)
               .map(m => ({ MESE: m, sum: Math.round(grouped[m] * 100) / 100 }));
           } else {
-            // HOME: ordina per numero mese 1-12
+            // HOME: sort by month number 1-12
             result = Object.entries(grouped)
               .sort(([a], [b]) => parseInt(a) - parseInt(b))
               .map(([mese, sum]) => ({ MESE: parseInt(mese), sum: Math.round(sum * 100) / 100 }));
           }
           return JSON.stringify({ trend: 'per_mese', result });
         } else {
-          // trend per anno
+          // trend by year
           const grouped = {};
           for (const r of rows) {
             if (!grouped[r.ANNO]) grouped[r.ANNO] = 0;
