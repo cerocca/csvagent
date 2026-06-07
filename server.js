@@ -435,16 +435,20 @@ app.get('/api/schema', (req, res) => {
 app.get('/api/version', (_, res) => res.json({ version }));
 
 // ─── Pre-aggregation helper ───────────────────────────────────────────────────
-function aggregateForReport(rows) {
-  const totalRows = rows.length;
-  const years = [...new Set(rows.map(r => r.ANNO))].sort((a, b) => a - b);
-  const categories = [...new Set(rows.map(r => r.CATEGORIA))].sort();
+function aggregateForReport(rows, yearFrom = null, yearTo = null) {
+  let filtered = rows;
+  if (yearFrom !== null) filtered = filtered.filter(r => r.ANNO >= yearFrom);
+  if (yearTo   !== null) filtered = filtered.filter(r => r.ANNO <= yearTo);
+
+  const totalRows  = filtered.length;
+  const years      = [...new Set(filtered.map(r => r.ANNO))].sort((a, b) => a - b);
+  const categories = [...new Set(filtered.map(r => r.CATEGORIA))].sort();
 
   const byYear = {};
   const byCategory = {};
   const monthlySeries = {};
 
-  for (const r of rows) {
+  for (const r of filtered) {
     byYear[r.ANNO] = (byYear[r.ANNO] || 0) + r.QUANTO;
     byCategory[r.CATEGORIA] = (byCategory[r.CATEGORIA] || 0) + r.QUANTO;
     if (!monthlySeries[r.ANNO]) monthlySeries[r.ANNO] = {};
@@ -454,7 +458,7 @@ function aggregateForReport(rows) {
   for (const k of Object.keys(byYear)) byYear[k] = Math.round(byYear[k] * 100) / 100;
   for (const k of Object.keys(byCategory)) byCategory[k] = Math.round(byCategory[k] * 100) / 100;
 
-  const topItems = [...rows]
+  const topItems = [...filtered]
     .sort((a, b) => b.QUANTO - a.QUANTO)
     .slice(0, 20)
     .map(r => ({ descrizione: r.COSA || '—', QUANTO: r.QUANTO, CATEGORIA: r.CATEGORIA, anno: r.ANNO }));
@@ -464,9 +468,11 @@ function aggregateForReport(rows) {
 
 // ─── Route POST /api/report ───────────────────────────────────────────────────
 app.post('/api/report', async (req, res) => {
-  const { dataset = 'BIKE' } = req.body;
+  const { dataset = 'BIKE', yearFrom = null, yearTo = null } = req.body;
+  const yearFromN = yearFrom != null ? parseInt(yearFrom) : null;
+  const yearToN   = yearTo   != null ? parseInt(yearTo)   : null;
   const ds = DATASETS[dataset] ?? DATASETS.BIKE;
-  const agg = aggregateForReport(ds.records);
+  const agg = aggregateForReport(ds.records, yearFromN, yearToN);
   const today = new Date().toLocaleDateString('it-IT');
   const label = dataset === 'BIKE' ? 'Ciclismo' : 'Casa';
 
@@ -517,9 +523,11 @@ Restituisci SOLO il codice HTML, senza markdown, senza backtick, senza testo agg
 
 // ─── Route POST /api/suggest ──────────────────────────────────────────────────
 app.post('/api/suggest', async (req, res) => {
-  const { dataset = 'BIKE' } = req.body;
+  const { dataset = 'BIKE', yearFrom = null, yearTo = null } = req.body;
+  const yearFromN = yearFrom != null ? parseInt(yearFrom) : null;
+  const yearToN   = yearTo   != null ? parseInt(yearTo)   : null;
   const ds = DATASETS[dataset] ?? DATASETS.BIKE;
-  const agg = aggregateForReport(ds.records);
+  const agg = aggregateForReport(ds.records, yearFromN, yearToN);
   const today = new Date().toLocaleDateString('it-IT');
   const label = dataset === 'BIKE' ? 'Ciclismo' : 'Casa';
 

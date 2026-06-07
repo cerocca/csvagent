@@ -61,11 +61,23 @@ CHI values: Nicola, Leti, Shared
 
 ## WebUI — toolbar
 - Dataset select: 🚴 Ciclismo / 🏠 Casa (history reset on change)
-- Model select: Haiku / Sonnet / Opus
-- Window size select: 4 / 6 / 10 / 20 messages (default 6) — sliding window on history before each send
+- Model select: Haiku / Sonnet / Opus — visible only in Domanda mode
+- Window size select: 4 / 6 / 10 / 20 messages (default 6) — sliding window on history before each send; visible only in Domanda mode
 - NEW button: clears conversationHistory[], removes active dataset's localStorage key, restores empty state; clears residual cards on next question
-- "↩ Riprendi" button: appears only if a saved session exists for the active dataset; restores cards and conversationHistory[] from localStorage
+- "↩ Riprendi" button: appears only if a saved session exists for the active dataset; restores cards and conversationHistory[] from localStorage; hidden in Report/Suggerimenti mode
 - UI language: Italian only. Internationalization (i18n) planned for a future release.
+
+### Adaptive UI per mode (`setMode(mode)`)
+- **Domanda mode**: full UI — textarea, model select, window select, "Chiedi" button, "↺ Nuova", "↩ Riprendi" (if session exists)
+- **Report / Suggerimenti mode**: only year-range selectors and action button (Genera report / Genera suggerimenti) visible; textarea, model select, window select, "Chiedi", "↺ Nuova", and "↩ Riprendi" are all hidden; action panel meta row already shows model (Sonnet) and output type
+
+### Year range selectors (Anno da / Anno a)
+- Visible only in Report and Suggerimenti modes
+- Options populated dynamically from `schema.years` of the active dataset via `populateYearSelects(years)`, called inside `loadSchema()`; reset on dataset change
+- Default: both set to "Tutto" (no filter)
+- Client-side validation: if both are set and yearFrom > yearTo, an inline error message blocks the API call
+- yearFrom === yearTo is valid (filters a single year)
+- Values sent to `/api/report` and `/api/suggest` as `yearFrom` (number|null) and `yearTo` (number|null)
 
 ## WebUI — CRONOLOGIA sidebar
 - Section in sidebar between DATI and SCHEMA

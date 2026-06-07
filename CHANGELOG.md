@@ -1,15 +1,35 @@
 # CHANGELOG
 
+## [0.7.8] - 2026-06-07
+
+### Fixed
+- Report/Suggest mode: hidden redundant Sonnet disclaimer (info already present in action-panel meta row)
+- Report/Suggest mode: hidden textarea (not needed in these modes)
+- Report/Suggest mode: hidden "Nuova" button (was incorrectly visible)
+
+## [0.7.7] - 2026-06-07
+
+### Added
+- **Adaptive UI for Report/Suggerimenti modes**: in Report and Suggerimenti modes, the model select, window-size select, "↩ Riprendi" button and "Chiedi" button are hidden; textarea remains visible for optional instructions; in their place a fixed disclaimer text and year range selectors are shown
+- **Year range selectors** (Anno da / Anno a): visible only in Report and Suggerimenti modes; years populated dynamically from the active dataset schema; client-side validation blocks the API call if "year from" > "year to"
+- **Server-side time filter**: `aggregateForReport(rows, yearFrom, yearTo)` accepts two optional parameters; filter applied before aggregation using the `ANNO` field (works for both BIKE and HOME datasets)
+- **Year range passed to API**: `/api/report` and `/api/suggest` routes read `yearFrom` and `yearTo` from the request body and pass them to `aggregateForReport`
+
+### Fixed
+- Disclaimer and year-range selectors moved out of `ctrl-row` to be full-width grid children of `ask-shell`; each element now occupies its own row with proper spacing
+- Year range selectors wrapped in `year-range-field` for inline label + select alignment
+- `action-panel` separator (`border-top`) added to visually anchor the action row
+
 ## [0.7.6] - 2026-06-06
 
 ### Fixed (design review — public/index.html only)
-- **Font loading (LCP)**: Google Fonts link ridotto da 8 a 3 famiglie (DM Sans, Instrument Serif, JetBrains Mono); rimosse Inter Tight, Plus Jakarta Sans, Manrope, Fraunces, DM Serif Display
-- **Emoji ☀**: aggiunto variation selector U+FE0F (☀️) per rendering colorato cross-browser/OS
-- **Brand alignment**: `.brand` da `align-items: baseline` a `align-items: center` per allineamento corretto tra brand-mark e h1
-- **Textarea height**: `min-height` portata da 32px a 40px, allineandola all'altezza del bottone Chiedi
-- **Border-radius coerenza**: `.ask-btn`, `.new-btn`, `.resume-btn` uniformati a `border-radius: 8px` (era 9px); `.ctrl` già a 8px; `.mode-btn` (pill) invariato
-- **Breakpoint orfano**: `@media (max-width: 720px)` per ask-shell stack verticale portato a `900px`, allineandolo al breakpoint del drawer sidebar
-- **Scrollbar history-list**: aggiunto `scrollbar-gutter: stable` per evitare layout shift quando appare la scrollbar
+- **Font loading (LCP)**: Google Fonts link reduced from 8 to 3 families (DM Sans, Instrument Serif, JetBrains Mono); removed Inter Tight, Plus Jakarta Sans, Manrope, Fraunces, DM Serif Display
+- **Emoji ☀**: added variation selector U+FE0F (☀️) for consistent colorful rendering across browsers/OS
+- **Brand alignment**: `.brand` changed from `align-items: baseline` to `align-items: center` for correct alignment between brand-mark and h1
+- **Textarea height**: `min-height` increased from 32px to 40px, matching the Chiedi button height
+- **Border-radius consistency**: `.ask-btn`, `.new-btn`, `.resume-btn` unified to `border-radius: 8px` (was 9px); `.ctrl` already at 8px; `.mode-btn` (pill) unchanged
+- **Orphan breakpoint**: `@media (max-width: 720px)` for ask-shell vertical stack moved to `900px`, aligned with the sidebar drawer breakpoint
+- **History-list scrollbar**: added `scrollbar-gutter: stable` to prevent layout shift when scrollbar appears
 
 ## [0.7.5] - 2026-06-06
 

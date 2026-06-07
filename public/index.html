@@ -920,7 +920,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.35rem 0.25rem;
+    padding: 0.55rem 0.25rem 0.35rem;
+    border-top: 1px solid var(--border);
   }
   .action-desc {
     font-size: 0.88rem;
@@ -994,6 +995,36 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     flex-shrink: 0;
+  }
+
+  /* Year range */
+  .year-range {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .year-range-field {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .year-range label {
+    font-size: 0.74rem;
+    color: var(--text-soft);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .year-range-sep {
+    color: var(--muted);
+    font-size: 0.82rem;
+    flex-shrink: 0;
+  }
+  .year-range-error {
+    grid-column: 1 / -1;
+    font-size: 0.74rem;
+    color: var(--warn);
+    padding: 0.1rem 0.1rem;
   }
 </style>
 </head>
@@ -1108,6 +1139,18 @@
           <button class="new-btn" id="new-btn" onclick="resetHistory()" title="Nuova conversazione">↺ Nuova</button>
           <button class="ask-btn" id="send-btn" onclick="submitQuestion()">Chiedi <span style="opacity:0.7">↵</span></button>
         </div>
+        <div class="year-range" id="year-range" style="display:none">
+          <div class="year-range-field">
+            <label for="year-from">Anno da</label>
+            <select id="year-from" class="ctrl"></select>
+          </div>
+          <span class="year-range-sep">–</span>
+          <div class="year-range-field">
+            <label for="year-to">Anno a</label>
+            <select id="year-to" class="ctrl"></select>
+          </div>
+        </div>
+        <div class="year-range-error" id="year-range-error" style="display:none">L'anno "da" non può essere maggiore dell'anno "a"</div>
         <div class="action-panel" id="action-panel" style="display:none">
           <div>
             <div class="action-desc" id="action-desc"></div>
@@ -1186,17 +1229,36 @@ function setMode(mode) {
   ['chat', 'report', 'suggest'].forEach(m => {
     document.getElementById('mode-' + m).className = 'mode-btn' + (mode === m ? ' active-' + m : '');
   });
-  const textarea = document.getElementById('question');
-  const sendBtn = document.getElementById('send-btn');
-  const actionPanel = document.getElementById('action-panel');
+  const textarea     = document.getElementById('question');
+  const sendBtn      = document.getElementById('send-btn');
+  const newBtn       = document.getElementById('new-btn');
+  const actionPanel  = document.getElementById('action-panel');
+  const modelSelect  = document.getElementById('model-select');
+  const windowSelect = document.getElementById('window-select');
+  const resumeBtn    = document.getElementById('resume-btn');
+  const yearRange    = document.getElementById('year-range');
+  const yearRangeError = document.getElementById('year-range-error');
+
   if (mode === 'chat') {
     textarea.style.display = '';
     sendBtn.style.display = '';
+    newBtn.style.display = '';
     actionPanel.style.display = 'none';
+    modelSelect.style.display = '';
+    windowSelect.style.display = '';
+    yearRange.style.display = 'none';
+    yearRangeError.style.display = 'none';
+    updateResumeButton();
   } else {
     const cfg = MODE_CONFIG[mode];
     textarea.style.display = 'none';
     sendBtn.style.display = 'none';
+    newBtn.style.display = 'none';
+    modelSelect.style.display = 'none';
+    windowSelect.style.display = 'none';
+    resumeBtn.style.display = 'none';
+    yearRange.style.display = '';
+    yearRangeError.style.display = 'none';
     document.getElementById('action-desc').textContent = cfg.text;
     document.getElementById('action-meta').textContent = cfg.meta;
     const runBtn = document.getElementById('run-btn');
@@ -1232,6 +1294,18 @@ async function runAction() {
   if (currentMode === 'chat') return;
   const cfg = MODE_CONFIG[currentMode];
   const dataset = document.getElementById('dataset-select').value;
+
+  const yearFromVal = document.getElementById('year-from').value;
+  const yearToVal   = document.getElementById('year-to').value;
+  const yearFrom    = yearFromVal ? parseInt(yearFromVal) : null;
+  const yearTo      = yearToVal   ? parseInt(yearToVal)   : null;
+  const errorEl     = document.getElementById('year-range-error');
+  if (yearFrom !== null && yearTo !== null && yearFrom > yearTo) {
+    errorEl.style.display = '';
+    return;
+  }
+  errorEl.style.display = 'none';
+
   const runBtn = document.getElementById('run-btn');
   runBtn.disabled = true;
   const toastEl = showToast(cfg, false, null);
@@ -1239,7 +1313,7 @@ async function runAction() {
     const r = await fetch(cfg.endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dataset })
+      body: JSON.stringify({ dataset, yearFrom, yearTo })
     });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const html = await r.text();
@@ -1298,7 +1372,23 @@ function loadSchema() {
       document.getElementById('schema-total').textContent = rowCount.toLocaleString('it-IT');
       document.getElementById('schema-period').textContent = period;
       document.getElementById('schema-cats').textContent = schema.categories.length;
+      populateYearSelects(yrs);
     });
+}
+
+function populateYearSelects(years) {
+  ['year-from', 'year-to'].forEach(id => {
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">Tutto</option>';
+    for (const y of years) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      sel.appendChild(opt);
+    }
+    if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+  });
 }
 
 /* API status */
