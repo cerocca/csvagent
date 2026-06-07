@@ -2,6 +2,9 @@
 
 ## [0.7.8] - 2026-06-07
 
+### Removed
+- test_suggest.html: test file removed from repository
+
 ### Fixed
 - Report/Suggest mode: hidden redundant Sonnet disclaimer (info already present in action-panel meta row)
 - Report/Suggest mode: hidden textarea (not needed in these modes)
