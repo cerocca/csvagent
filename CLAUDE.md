@@ -1,4 +1,4 @@
-# csvagent — context for Claude Code
+# csvagent v0.7.8 — context for Claude Code
 
 ## What it is
 Node.js agent that analyzes personal expense CSVs via a browser interface.
